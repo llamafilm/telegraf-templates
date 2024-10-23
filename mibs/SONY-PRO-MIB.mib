@@ -1,0 +1,1164 @@
+--
+-- Sony Pro-AV MIB
+--
+-- Common Definitions and Common MIB
+--
+-- July 3, 2013 Release 1.26
+--
+--
+-- Copying all part of the contents of this file are prohibited by copyright laws.
+-- The company cannot accept liability for damage or loss resulting from the use
+-- of this  file, or for any claim from a third party.
+-- The contents and specifications may be subject to change without notice.
+--
+
+SONY-PRO-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	DisplayString,
+	TEXTUAL-CONVENTION
+		FROM SNMPv2-TC
+	professionalV1
+		FROM SONY-SMI
+	MODULE-IDENTITY,
+	OBJECT-IDENTITY,
+	OBJECT-TYPE,
+	NOTIFICATION-TYPE,
+	Integer32,
+	IpAddress
+		FROM SNMPv2-SMI
+	OBJECT-GROUP,
+	NOTIFICATION-GROUP,
+	MODULE-COMPLIANCE
+		FROM SNMPv2-CONF;
+
+proV1MIB MODULE-IDENTITY
+	LAST-UPDATED "201307030555Z"	-- Jul 3, 2013 5:55:00 AM
+	ORGANIZATION "Sony Corporation"
+	CONTACT-INFO
+		"Content Workflow Solutions Business Division
+		Professional Solutions Group
+		Sony Corporation"
+	DESCRIPTION
+		"This MIB is designed for use in managing Sony Professional Audio & Visual product."
+	REVISION "201307030555Z"	-- Jul 3, 2013 5:55:00 AM
+	DESCRIPTION
+		"Release 1.26
+		New category types added.
+		portableSwitcher(2210)"
+	REVISION "201302220746Z"	-- Feb 22, 2013 7:46:00 AM
+	DESCRIPTION
+		"Release 1.25
+		New category types added.
+		ProV1Trap OID 5->0"
+	REVISION "201008181056Z"	-- Aug 18, 2010 10:56:00 AM
+	DESCRIPTION
+		"Release 1.24
+		New category types added."
+	REVISION "200806021358Z"	-- Jun 2, 2008 1:58:00 PM
+	DESCRIPTION
+		"Release 1.23
+		New category types added."
+	REVISION "200802261507Z"	-- Feb 26, 2008 3:07:00 PM
+	DESCRIPTION
+		"Release 1.22
+		New category types added."
+	REVISION "200710121406Z"	-- Oct 12, 2007 2:06:00 PM
+	DESCRIPTION
+		"Release 1.21
+		New category types added."
+	REVISION "200708271430Z"	-- Aug 27, 2007 2:30:00 PM
+	DESCRIPTION
+		"Release 1.20
+		New category types added."
+	REVISION "200407231121Z"	-- Jul 23, 2004 11:21:00 AM
+	DESCRIPTION
+		"Release 1.10
+		New category types added.
+		Descriptions comprehensively updated."
+	REVISION "200307161436Z"	-- Jul 16, 2003 2:36:00 PM
+	DESCRIPTION
+		"compliance added"
+	-- 1.3.6.1.4.1.122.8501.1
+::= { professionalV1 1 }
+
+
+--
+-- TEXTUAL-CONVENTION definition
+--
+
+ProV1Cycle ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for cycle time
+		unit: sec."
+	SYNTAX Integer32 (0..2147483647)
+
+
+ProV1FrameNumber ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for the frame number
+		unit: /sec"
+	SYNTAX Integer32 (0..2147483647)
+
+
+ProV1Frequency ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for frequency
+		unit: /sec."
+	SYNTAX Integer32 (0..2147483647)
+
+
+ProV1ProductId ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for device product ID"
+	SYNTAX OCTET STRING (SIZE (0..64))
+
+
+ProV1ProductIdx ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for device product idx"
+	SYNTAX Integer32 (1..2147483647)
+
+
+ProV1ScanningLineNumber ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for the scanning line number
+		unit: /sec"
+	SYNTAX Integer32 (0..2147483647)
+
+
+ProV1Status ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for device status"
+	SYNTAX INTEGER {
+			unknown(1),
+			down(2),
+			up(3) }
+
+
+ProV1TimeStamp ::= TEXTUAL-CONVENTION
+	STATUS  current
+	DESCRIPTION
+		"textual information for printable timestamp(localtime).
+		example: 2000/08/29 22:30:00:00 GMT+09:00.
+		This expresses the local time information as a character
+		string with the format 'YYYY/MM/DD hh:mm:ss:ff GMT+HH:MM'.
+		The ff positioned after the seconds(ss) expresses the frame number,
+		and the section from GMT onward expresses the time difference from
+		Greenwich Mean Time(GMT). The + may be replaced by -."
+	SYNTAX OCTET STRING (SIZE (32))
+
+
+--
+-- OBJECT-IDENTITY definition
+--
+
+proV1Common OBJECT-IDENTITY
+	STATUS  current
+	DESCRIPTION
+		"proV1Common is the root OBJECT IDENTIFIER of the Common MIB."
+	-- 1.3.6.1.4.1.122.8501.2
+::= { professionalV1 2 }
+
+--
+-- OBJECT IDENTITY
+--
+
+proV1ProductInfo OBJECT-IDENTITY
+	STATUS  current
+	DESCRIPTION
+		"Product ID Information comprises the ID information table for specifying
+		the product and the module information table for acquiring the information
+		for the modules included in the product."
+	-- 1.3.6.1.4.1.122.8501.2.1
+::= { proV1Common 1 }
+
+--
+-- Product Information
+--
+
+proV1ProdIdInfoTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ProV1ProdIdInfoEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"Stores the Product ID Information in table format."
+	-- 1.3.6.1.4.1.122.8501.2.1.1
+::= { proV1ProductInfo 1 }
+
+
+proV1ProdIdInfoEntry OBJECT-TYPE
+	SYNTAX  ProV1ProdIdInfoEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry in the proV1ProdIdInfoTable."
+	INDEX {
+		proV1ProdIdInfoIdx }
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1
+::= { proV1ProdIdInfoTable 1 }
+
+
+ProV1ProdIdInfoEntry ::= SEQUENCE {
+
+	proV1ProdIdInfoIdx         Integer32,
+	proV1ProdIdInfoDevID       DisplayString,
+	proV1ProdIdInfoManufact    DisplayString,
+	proV1ProdIdInfoModel       DisplayString,
+	proV1ProdIdInfoDest        DisplayString,
+	proV1ProdIdInfoSN          DisplayString,
+	proV1ProdIdInfoCat         INTEGER,
+	proV1ProdIdInfoVer         Integer32,
+	proV1ProdIdInfoModelSuffix DisplayString,
+	proV1ProdIdInfoVerSuffix   DisplayString }
+
+
+proV1ProdIdInfoIdx OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"This is an index number for specifying the entries in this table."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.1
+::= { proV1ProdIdInfoEntry 1 }
+
+
+proV1ProdIdInfoDevID OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"A device number or name is entered that is set so that the customer
+		can identify the product. It is assumed that the device ID is either
+		set numerically from the control panel of the product or that
+		a character string is set using http or telnet through the network.
+		Also, it is mounted so that the Device ID in the first line (instance)
+		of this table takes the same value as sysName in the MIB-2 System Group."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.2
+::= { proV1ProdIdInfoEntry 2 }
+
+
+proV1ProdIdInfoManufact OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The vendor name is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.3
+::= { proV1ProdIdInfoEntry 3 }
+
+
+proV1ProdIdInfoModel OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The model name is entered. Also, it is mounted so that the Model Name
+		in the first line (instance) of this table takes the same value as
+		sysDescr in the MIB-2 System group."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.4
+::= { proV1ProdIdInfoEntry 4 }
+
+
+proV1ProdIdInfoDest OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The destination is entered.
+		(Examples: J: For Japan, UC: For North American, EK: For European Countries, SY: For World Wide)"
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.5
+::= { proV1ProdIdInfoEntry 5 }
+
+
+proV1ProdIdInfoSN OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The serial number is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.6
+::= { proV1ProdIdInfoEntry 6 }
+
+
+proV1ProdIdInfoCat OBJECT-TYPE
+	SYNTAX  INTEGER {
+			vtr(1100),
+			disk(1200),
+			dataRecorder(1300),
+			cart(1400),
+			xdcamCart(1410),
+			library(1420),
+			diskRecorder(1500),
+			xdcamPortable(1510),
+			xdcamDeck(1520),
+			avStorage(1600),
+			hdAvStorage(1610),
+			memoryRecorder(1700),
+			srmasterMemDeck(1710),
+			xdcamMemDeck(1720),
+			router(2100),
+			routerRemotePanel(2110),
+			switcher(2200),
+			portableSwitcher(2210),
+			dme(2300),
+			peripheral(2400),
+			controller(2500),
+			codec(2600),
+			ioBoard(2650),
+			editor(2700),
+			nonlinearEditor(2750),
+			mediaProcessor(2800),
+			studioCamera(3100),
+			cameraHeadUnit(3110),
+			cameraControlUnit(3120),
+			cameraControlPanel(3130),
+			masterSetupUnit(3140),
+			cameraNetworkAdaptor(3190),
+			securityCamera(3200),
+			ieee1394Camera(3220),
+			camcorder(3300),
+			xdcamCamcorder(3310),
+			networkCamera(3400),
+			monitor(4100),
+			flatpanelMonitor(4150),
+			projector(4200),
+			jjtron(4300),
+			informationDisplay(4400),
+			infoDisplayMonitor(4410),
+			infoDisplayProjector(4420),
+			displayController(4500),
+			audioMixer(5100),
+			mo(5200),
+			cd(5220),
+			dat(5240),
+			mic(5300),
+			printer(6100),
+			pcBasedProduct(8100),
+			stationaryRmManager(8101),
+			mobileRmManager(8102),
+			isrProxy(8103),
+			pcServer(8200),
+			eConferenceCreator(8201),
+			eConferenceCommunicator(8202),
+			videoConference(8300),
+			broadcast(8400),
+			sonaps(8410),
+			mediaBackboneEnsemble(8420),
+			mediaBackboneConductor(8430),
+			xdcamArchive(8440),
+			cellProduct(8510),
+			other(9000) }
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The category type information prescribed by Sony is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.7
+::= { proV1ProdIdInfoEntry 7 }
+
+
+proV1ProdIdInfoVer OBJECT-TYPE
+	SYNTAX  Integer32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The version number for the product is entered.  (This is the version set for
+		the product as a whole, not the version for the internal firmware or the like.)
+		Up to 2 digits beyond the decimal point are specified, as in Vn.nn.
+		(V1.12 -> 112 is entered.)"
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.8
+::= { proV1ProdIdInfoEntry 8 }
+
+
+proV1ProdIdInfoModelSuffix OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Optional suffix for proV1ProdIdInfoModel(4).
+		Extention of the model name is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.9
+::= { proV1ProdIdInfoEntry 9 }
+
+
+proV1ProdIdInfoVerSuffix OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Optional suffix for proV1ProdIdInfoVer(8).
+		Extention of the version number for the product is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.1.1.10
+::= { proV1ProdIdInfoEntry 10 }
+
+
+proV1ModuleTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ProV1ModuleEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"The module information included in the product is stored in module informatiuon table
+		in table form.  This table is primarily used to store the versions for the firmware (ROM)
+		included in the product.  This information can also be used to read out information on
+		the hardware configuration of the product."
+	-- 1.3.6.1.4.1.122.8501.2.1.2
+::= { proV1ProductInfo 2 }
+
+
+proV1ModuleEntry OBJECT-TYPE
+	SYNTAX  ProV1ModuleEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry of proV1ModuleTable."
+	INDEX {
+		proV1ModuleProdId,
+		proV1ModuleIdx }
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1
+::= { proV1ModuleTable 1 }
+
+
+ProV1ModuleEntry ::= SEQUENCE {
+
+	proV1ModuleProdId     Integer32,
+	proV1ModuleIdx        Integer32,
+	proV1ModuleType       INTEGER,
+	proV1ModuleName       DisplayString,
+	proV1ModuleVer        Integer32,
+	proV1ModuleNameSuffix DisplayString,
+	proV1ModuleVerSuffix  DisplayString }
+
+
+proV1ModuleProdId OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"When the information of the multiple box products is included in the
+		Product ID Information Table described above, this Product ID Index
+		shows which box product each module belongs to. When the table is only
+		for one product, 1 is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1.1
+::= { proV1ModuleEntry 1 }
+
+
+proV1ModuleIdx OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"This is an index number for specifying the entry in this table.
+		This index number does not necessarily need to be consecutive.
+		For example, ROM management number is determined according to the
+		mounting location can be mounted, and if there is an empty mounting
+		location, the corresponding index number can be skipped."
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1.2
+::= { proV1ModuleEntry 2 }
+
+
+proV1ModuleType OBJECT-TYPE
+	SYNTAX  INTEGER {
+			rom(1),
+			hardDisk(2),
+			softwareModule(3),
+			board(11),
+			daughterBoard(12),
+			functionModule(13) }
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The module type is displayied. For firmware, 01 (ROM) is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1.3
+::= { proV1ModuleEntry 3 }
+
+
+proV1ModuleName OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The module name is entered. For firmware, the board name/firmware name (ROM name)
+		is appropriate. Examples: SS-88/SYS, SS-88/SV"
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1.4
+::= { proV1ModuleEntry 4 }
+
+
+proV1ModuleVer OBJECT-TYPE
+	SYNTAX  Integer32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The module version number is entered. Up to 2 digits beyond the decimal point are
+		specified, as in Vn.nn. (V1.12 -> 112 is entered.)"
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1.5
+::= { proV1ModuleEntry 5 }
+
+
+proV1ModuleNameSuffix OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Optional suffix for proV1ModuleName(4).
+		Extention of the module name is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1.6
+::= { proV1ModuleEntry 6 }
+
+
+proV1ModuleVerSuffix OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Optional suffix for proV1ModuleVer(5).
+		Extention of the version number for the module is entered."
+	-- 1.3.6.1.4.1.122.8501.2.1.2.1.7
+::= { proV1ModuleEntry 7 }
+
+
+proV1AgentInfo OBJECT-IDENTITY
+	STATUS  current
+	DESCRIPTION
+		"This is the MIB for information related to the SNMP agent and
+		Remote Maintenance Functions. It comprises the MIB version information,
+		Category MIB and Product MIB mounting information, trap destination
+		address table, remote maintenance function mounting status, and
+		local clock time. This information is used to make it easy to set
+		and operate the SNMP manager."
+	-- 1.3.6.1.4.1.122.8501.2.2
+::= { proV1Common 2 }
+
+--
+-- Agent Information
+--
+
+proV1AgentMIBVer OBJECT-TYPE
+	SYNTAX  Integer32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The version number of MIB structure information written with is entered.
+		Up to 2 digits beyond the decimal point are specified, as in Vn.nn.
+		(V2.00 -> 200 is entered.) This MIB is written with SMIv2. 200 is applied
+		for SMIv2."
+	-- 1.3.6.1.4.1.122.8501.2.2.1
+::= { proV1AgentInfo 1 }
+
+
+proV1AgentMIBCatTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ProV1AgentMIBCatEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table shows which expansion MIB of the Sony Pro-AV MIB are mounted in
+		the SNMP agent in addition to the Common MIB.  This table contains information
+		on the expanded MIB for each category. The top object identifier of the mounted
+		Category MIB is held in this table. In the case of complex products, it may have
+		plural Category MIB modules."
+	-- 1.3.6.1.4.1.122.8501.2.2.2
+::= { proV1AgentInfo 2 }
+
+
+proV1AgentMIBCatEntry OBJECT-TYPE
+	SYNTAX  ProV1AgentMIBCatEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry in the proV1AgentMIBCatTable."
+	INDEX {
+		proV1AgentMIBCatIdx }
+	-- 1.3.6.1.4.1.122.8501.2.2.2.1
+::= { proV1AgentMIBCatTable 1 }
+
+
+ProV1AgentMIBCatEntry ::= SEQUENCE {
+
+	proV1AgentMIBCatIdx Integer32,
+	proV1AgentMIBCatOID OBJECT IDENTIFIER }
+
+
+proV1AgentMIBCatIdx OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"This is an index number for specifying the entry in this table."
+	-- 1.3.6.1.4.1.122.8501.2.2.2.1.1
+::= { proV1AgentMIBCatEntry 1 }
+
+
+proV1AgentMIBCatOID OBJECT-TYPE
+	SYNTAX  OBJECT IDENTIFIER
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"This is the value of the object identifier for the MIB module that
+		the equipment (Agent) holds."
+	-- 1.3.6.1.4.1.122.8501.2.2.2.1.2
+::= { proV1AgentMIBCatEntry 2 }
+
+
+proV1AgentMIBProdTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ProV1AgentMIBProdEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table shows which expansion MIB of the Sony Pro-AV MIB is mounted
+		in the SNMP agent in addition to the Common MIB and Category MIB(s).
+		This table contains information on the expanded MIB for each product.
+		The top object identifier of the mounted Product MIB module is held in this table.
+		In the case of complex product, it may have multiple Product MIB modules."
+	-- 1.3.6.1.4.1.122.8501.2.2.3
+::= { proV1AgentInfo 3 }
+
+
+proV1AgentMIBProdEntry OBJECT-TYPE
+	SYNTAX  ProV1AgentMIBProdEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry to proV1AgentMIBProdTable."
+	INDEX {
+		proV1AgentMIBProdIdx }
+	-- 1.3.6.1.4.1.122.8501.2.2.3.1
+::= { proV1AgentMIBProdTable 1 }
+
+
+ProV1AgentMIBProdEntry ::= SEQUENCE {
+
+	proV1AgentMIBProdIdx Integer32,
+	proV1AgentMIBProdOID OBJECT IDENTIFIER }
+
+
+proV1AgentMIBProdIdx OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Index number for specifying the entry in this table."
+	-- 1.3.6.1.4.1.122.8501.2.2.3.1.1
+::= { proV1AgentMIBProdEntry 1 }
+
+
+proV1AgentMIBProdOID OBJECT-TYPE
+	SYNTAX  OBJECT IDENTIFIER
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Value of the object identifier for the MIB module that
+		the equipment (Agent) holds."
+	-- 1.3.6.1.4.1.122.8501.2.2.3.1.2
+::= { proV1AgentMIBProdEntry 2 }
+
+
+proV1TrapDestTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ProV1TrapDestEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"The trap destination address (IP address) for SNMP agent is stored.
+		The trap destination address is generally set up manually using the
+		control panel, web browser, telnet, or the like when the product is
+		installed. For some products, it is desirable to automate this process
+		and simplify the installing operation. For such products, the structure
+		takes into account setting up the trap destination address automatically
+		through negotiation with the SNMP Manager."
+	-- 1.3.6.1.4.1.122.8501.2.2.4
+::= { proV1AgentInfo 4 }
+
+
+proV1TrapDestEntry OBJECT-TYPE
+	SYNTAX  ProV1TrapDestEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"Entry to the proV1TrapDestTable"
+	INDEX {
+		proV1TrapDestIdx }
+	-- 1.3.6.1.4.1.122.8501.2.2.4.1
+::= { proV1TrapDestTable 1 }
+
+
+ProV1TrapDestEntry ::= SEQUENCE {
+
+	proV1TrapDestIdx         Integer32,
+	proV1TrapDestAddress     IpAddress,
+	proV1TrapDestEntryStatus INTEGER }
+
+
+proV1TrapDestIdx OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Index number for specifying the entry in this table."
+	-- 1.3.6.1.4.1.122.8501.2.2.4.1.1
+::= { proV1TrapDestEntry 1 }
+
+
+proV1TrapDestAddress OBJECT-TYPE
+	SYNTAX  IpAddress
+	MAX-ACCESS read-write
+	STATUS  current
+	DESCRIPTION
+		"The trap destination address (IP address) is displayed."
+	-- 1.3.6.1.4.1.122.8501.2.2.4.1.2
+::= { proV1TrapDestEntry 2 }
+
+
+proV1TrapDestEntryStatus OBJECT-TYPE
+	SYNTAX  INTEGER {
+			valid(1),
+			createRequest(2),
+			underCreation(3),
+			invalid(4),
+			fixed(5) }
+	MAX-ACCESS read-write
+	STATUS  current
+	DESCRIPTION
+		"This variable is for adding entries from the SNMP Manager.
+		1-valid, 2-createRequest, 3-underCreation, 4-invalid, 5-fixed."
+	-- 1.3.6.1.4.1.122.8501.2.2.4.1.3
+::= { proV1TrapDestEntry 3 }
+
+
+proV1RemoteMainteTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ProV1RemoteMainteEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table stores information on the Remote Maintenance Functions mounted
+		on the product. Obtaining this information from the Agent enables the
+		SNMP Manager to link the monitoring functions and maintenance functions."
+	-- 1.3.6.1.4.1.122.8501.2.2.5
+::= { proV1AgentInfo 5 }
+
+
+proV1RemoteMainteEntry OBJECT-TYPE
+	SYNTAX  ProV1RemoteMainteEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"Entry to proV1RemoteMainteTable."
+	INDEX {
+		proV1RemoteMainteIdx }
+	-- 1.3.6.1.4.1.122.8501.2.2.5.1
+::= { proV1RemoteMainteTable 1 }
+
+
+ProV1RemoteMainteEntry ::= SEQUENCE {
+
+	proV1RemoteMainteIdx       Integer32,
+	proV1RemoteMainteFunction  INTEGER,
+	proV1RemoteMainteProtoType Integer32,
+	proV1RemoteMainteProtoVer  Integer32,
+	proV1RemoteMaintePath      DisplayString,
+	proV1RemoteMainteSvcLevel  Integer32 }
+
+
+proV1RemoteMainteIdx OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Index number for specifying the entry in this table."
+	-- 1.3.6.1.4.1.122.8501.2.2.5.1.1
+::= { proV1RemoteMainteEntry 1 }
+
+
+proV1RemoteMainteFunction OBJECT-TYPE
+	SYNTAX  INTEGER {
+			snmpMib2Agent(1),
+			snmpPrivateMibAgent(2),
+			emailNotification(11),
+			emailOperation(12),
+			statusReferring(21),
+			logTransfer(31),
+			settingCheckAndChange(41),
+			dataDownload(42),
+			dataUpload(43),
+			diagnosisExecution(51),
+			softwareDownload(61),
+			softwareUpload(62),
+			resetReboot(71),
+			modeChange(72),
+			control(81) }
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The type of Remote Maintenance Function is entered."
+	-- 1.3.6.1.4.1.122.8501.2.2.5.1.2
+::= { proV1RemoteMainteEntry 2 }
+
+
+proV1RemoteMainteProtoType OBJECT-TYPE
+	SYNTAX  Integer32 (0..65535)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"A number showing the protocol used for Remote Maintenance Functions is entered.
+		This number is the socket port number.
+		80-HTTP, 20-FTP, 23-TELNET, 110-SMTP, 25-POP3, 161-SNMP"
+	-- 1.3.6.1.4.1.122.8501.2.2.5.1.3
+::= { proV1RemoteMainteEntry 3 }
+
+
+proV1RemoteMainteProtoVer OBJECT-TYPE
+	SYNTAX  Integer32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Version number of the IP protocol used for Remote Maintenance Functions is entered."
+	-- 1.3.6.1.4.1.122.8501.2.2.5.1.4
+::= { proV1RemoteMainteEntry 4 }
+
+
+proV1RemoteMaintePath OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Path name that is accessed initialy when the unit is accessed using
+		http (Web browser) or ftp (ftp client). For example, if the IP address
+		for the target unit is 192.168.10.101 and the pass for the setting
+		change functions is /setup, then /setup is entered here."
+	-- 1.3.6.1.4.1.122.8501.2.2.5.1.5
+::= { proV1RemoteMainteEntry 5 }
+
+
+proV1RemoteMainteSvcLevel OBJECT-TYPE
+	SYNTAX  Integer32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Service level number of Remote Maintenance Function"
+	-- 1.3.6.1.4.1.122.8501.2.2.5.1.6
+::= { proV1RemoteMainteEntry 6 }
+
+
+proV1LocalClockTime OBJECT-TYPE
+	SYNTAX  ProV1TimeStamp (SIZE (32))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"When the unit has a built-in clock, its time is returned."
+	-- 1.3.6.1.4.1.122.8501.2.2.6
+::= { proV1AgentInfo 6 }
+
+
+proV1ErrorStatus OBJECT-IDENTITY
+	STATUS  current
+	DESCRIPTION
+		"Information on the errors and warnings currently generated in the
+		product is stored in table format. This is not a table storing a
+		history of past error/warning information."
+	-- 1.3.6.1.4.1.122.8501.2.3
+::= { proV1Common 3 }
+
+--
+-- Error/Warning Information
+--
+
+proV1ErrStatTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ProV1ErrStatEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"Information on the errors and warnings currently generated in the product."
+	-- 1.3.6.1.4.1.122.8501.2.3.1
+::= { proV1ErrorStatus 1 }
+
+
+proV1ErrStatEntry OBJECT-TYPE
+	SYNTAX  ProV1ErrStatEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"Entry to the proV1ErrorStatusTable."
+	INDEX {
+		proV1ErrStatProdId,
+		proV1ErrStatErrIdx }
+	-- 1.3.6.1.4.1.122.8501.2.3.1.1
+::= { proV1ErrStatTable 1 }
+
+
+ProV1ErrStatEntry ::= SEQUENCE {
+
+	proV1ErrStatProdId Integer32,
+	proV1ErrStatErrIdx Integer32,
+	proV1ErrStatLevel  INTEGER,
+	proV1ErrStatCode   DisplayString,
+	proV1ErrStatDescr  DisplayString,
+	proV1ErrStatTime   ProV1TimeStamp }
+
+
+proV1ErrStatProdId OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The index number of the Product ID Information Table is entered to specify
+		the product that the error/warning is generated in. If the product is a
+		stand-alone product and has no other product underneath it, 1 is entered
+		as the index value."
+	-- 1.3.6.1.4.1.122.8501.2.3.1.1.1
+::= { proV1ErrStatEntry 1 }
+
+
+proV1ErrStatErrIdx OBJECT-TYPE
+	SYNTAX  Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"When managing faults within the product, an index number to specify
+		the fault is entered. For example, when three faults are detected,
+		the corresponding error index numbers of them are attached in order to
+		manage and transmit the fault information."
+	-- 1.3.6.1.4.1.122.8501.2.3.1.1.2
+::= { proV1ErrStatEntry 2 }
+
+
+proV1ErrStatLevel OBJECT-TYPE
+	SYNTAX  INTEGER {
+			critical(1),
+			major(2),
+			minor(3),
+			warning(4),
+			clear(5),
+			information(6) }
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"A value is entered showing how critical the error is.
+		1-critical,  2-major,  3-minor,  4-warning,  5-clear(Normal),  6-information"
+	-- 1.3.6.1.4.1.122.8501.2.3.1.1.3
+::= { proV1ErrStatEntry 3 }
+
+
+proV1ErrStatCode OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"An error code is entered that is prescribed for the product and
+		product category. Alphanumeric characters can be used, but capital
+		letters and small letters are not distinguished. Also, do not use
+		symbols. Also, because the codes take the form of character strings
+		not numbers, the same numeric value written in a different way is
+		recognized as a different code, for example 0001 and 1."
+	-- 1.3.6.1.4.1.122.8501.2.3.1.1.4
+::= { proV1ErrStatEntry 4 }
+
+
+proV1ErrStatDescr OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"An explanation of the error or error name is entered with which
+		the gist of the meaning of the error/warning can be understood."
+	-- 1.3.6.1.4.1.122.8501.2.3.1.1.5
+::= { proV1ErrStatEntry 5 }
+
+
+proV1ErrStatTime OBJECT-TYPE
+	SYNTAX  ProV1TimeStamp (SIZE (32))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Time at which the error/warning (or the end of error/warning) was
+		generated is entered (yyyy/mm/dd hh:mm:ss:ff GMT+xx:xx).
+		Here, the ff expresses the frame number and the GMT+xx:xx expresses
+		the time difference from Greenwich Mean Time (GMT)."
+	-- 1.3.6.1.4.1.122.8501.2.3.1.1.6
+::= { proV1ErrStatEntry 6 }
+
+
+proV1Trap OBJECT-IDENTITY
+	STATUS  current
+	DESCRIPTION
+		"The trap announcing the occurrence (and end) of error/warning
+		is defined as collections of the items."
+	-- 1.3.6.1.4.1.122.8501.0
+::= { professionalV1 0 }
+
+proV1CommonConformance OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.122.8501.2.100
+::= { proV1Common 100 }
+
+proV1Compliances OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.122.8501.2.100.1
+::= { proV1CommonConformance 1 }
+
+proV1Groups OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.122.8501.2.100.2
+::= { proV1CommonConformance 2 }
+
+proV1Category OBJECT-IDENTITY
+	STATUS  current
+	DESCRIPTION
+		"proV1Category is the root OBJECT IDENTIFIER for product category
+		specific information"
+	-- 1.3.6.1.4.1.122.8501.3
+::= { professionalV1 3 }
+
+proV1Product OBJECT-IDENTITY
+	STATUS  current
+	DESCRIPTION
+		"proV1Product is the root OBJECT IDENTIFIER for product
+		specific information."
+	-- 1.3.6.1.4.1.122.8501.4
+::= { professionalV1 4 }
+
+
+--
+-- Trap Information  (Specific Trap No. = 65793 (0001 0000 0001 0000 0001(2))
+--
+
+proV1Trap1 NOTIFICATION-TYPE
+	OBJECTS {
+		proV1ProdIdInfoIdx,
+		proV1ProdIdInfoDevID,
+		proV1ProdIdInfoManufact,
+		proV1ProdIdInfoModel,
+		proV1ProdIdInfoDest,
+		proV1ProdIdInfoSN,
+		proV1ProdIdInfoCat,
+		proV1ProdIdInfoVer,
+		proV1ProdIdInfoModelSuffix,
+		proV1ProdIdInfoVerSuffix,
+		proV1ErrStatErrIdx,
+		proV1ErrStatLevel,
+		proV1ErrStatCode,
+		proV1ErrStatDescr,
+		proV1ErrStatTime}
+	STATUS  current
+	DESCRIPTION
+		"This is trap collection to notify of Error / Warning (or recover)."
+	-- 1.3.6.1.4.1.122.8501.0.65793
+::= { proV1Trap 65793 }
+
+proV1ProductInfoGroup OBJECT-GROUP
+	OBJECTS {
+		proV1ProdIdInfoIdx,
+		proV1ProdIdInfoDevID,
+		proV1ProdIdInfoManufact,
+		proV1ProdIdInfoModel,
+		proV1ProdIdInfoDest,
+		proV1ProdIdInfoSN,
+		proV1ProdIdInfoCat,
+		proV1ProdIdInfoVer,
+		proV1ProdIdInfoModelSuffix,
+		proV1ProdIdInfoVerSuffix }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.1
+::= { proV1Groups 1 }
+
+proV1AgentInfoGroup OBJECT-GROUP
+	OBJECTS {
+		proV1AgentMIBVer,
+		proV1AgentMIBCatIdx,
+		proV1AgentMIBCatOID,
+		proV1AgentMIBProdIdx,
+		proV1AgentMIBProdOID }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.2
+::= { proV1Groups 2 }
+
+proV1ErrorStatusGroup OBJECT-GROUP
+	OBJECTS {
+		proV1ErrStatProdId,
+		proV1ErrStatErrIdx,
+		proV1ErrStatLevel,
+		proV1ErrStatCode,
+		proV1ErrStatDescr,
+		proV1ErrStatTime }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.3
+::= { proV1Groups 3 }
+
+proV1ModuleGroup OBJECT-GROUP
+	OBJECTS {
+		proV1ModuleProdId,
+		proV1ModuleIdx,
+		proV1ModuleType,
+		proV1ModuleName,
+		proV1ModuleVer,
+		proV1ModuleNameSuffix,
+		proV1ModuleVerSuffix }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.4
+::= { proV1Groups 4 }
+
+proV1RemoteMaintenanceGroup OBJECT-GROUP
+	OBJECTS {
+		proV1RemoteMainteIdx,
+		proV1RemoteMainteFunction,
+		proV1RemoteMainteProtoType,
+		proV1RemoteMainteProtoVer,
+		proV1RemoteMaintePath,
+		proV1RemoteMainteSvcLevel }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.5
+::= { proV1Groups 5 }
+
+proV1LocalClockTimeGroup OBJECT-GROUP
+	OBJECTS {
+		proV1LocalClockTime }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.6
+::= { proV1Groups 6 }
+
+proV1TrapGroup OBJECT-GROUP
+	OBJECTS {
+		proV1TrapDestIdx,
+		proV1TrapDestAddress,
+		proV1TrapDestEntryStatus }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.7
+::= { proV1Groups 7 }
+
+proV1NotificationGroup NOTIFICATION-GROUP
+	NOTIFICATIONS {
+		proV1Trap1 }
+	STATUS  current
+	DESCRIPTION ""
+	-- 1.3.6.1.4.1.122.8501.2.100.2.8
+::= { proV1Groups 8 }
+
+
+proV1Compliance MODULE-COMPLIANCE
+	STATUS  obsolete
+	DESCRIPTION ""
+
+	MODULE 
+	MANDATORY-GROUPS {
+			proV1AgentInfoGroup,
+			proV1ErrorStatusGroup,
+			proV1ModuleGroup,
+			proV1RemoteMaintenanceGroup,
+			proV1LocalClockTimeGroup,
+			proV1TrapGroup,
+			proV1NotificationGroup,
+			proV1ProductInfoGroup }
+
+	-- 1.3.6.1.4.1.122.8501.2.100.1.1
+::= { proV1Compliances 1 }
+
+END
+---
+

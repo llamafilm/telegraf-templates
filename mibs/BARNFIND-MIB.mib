@@ -1,0 +1,2212 @@
+BARNFIND-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY,
+    OBJECT-TYPE,
+    enterprises,
+    Integer32,
+    NOTIFICATION-TYPE                        FROM SNMPv2-SMI
+    SnmpAdminString                          FROM SNMP-FRAMEWORK-MIB
+    TEXTUAL-CONVENTION,
+    DisplayString,
+    TruthValue,
+    RowStatus                                FROM SNMPv2-TC
+    InetAddress,
+    InetAddressType,
+    InetAddressIPv4,
+    InetAddressIPv6,
+    InetAddressPrefixLength                  FROM INET-ADDRESS-MIB
+    MODULE-COMPLIANCE,
+    OBJECT-GROUP,
+    NOTIFICATION-GROUP                       FROM SNMPv2-CONF;
+
+--
+-- A brief description and update information about this mib.
+--
+barnfind MODULE-IDENTITY
+    LAST-UPDATED "201712011338Z"
+    ORGANIZATION "Barnfind Technologies AS"
+    CONTACT-INFO "postal:   Barnfind Technologies AS
+                            Attn: Stian Skjelstad
+                            Ranvik Brygge 7
+                            3157 Sandefjord
+                            Norway
+                  tel:      +47 980 88 599
+                  email:    stian@barnfind.no
+                 "
+    DESCRIPTION
+        "This file defindes the private Barnfind SNMP MIB extension for
+         controlling Barnfind Technologies AS equipment."
+
+    REVISION     "201712011338Z"
+    DESCRIPTION
+         "Added aaMadiTable - This is for supporting BTF1-10-AA-MADI frame"
+
+    REVISION     "201704211118Z"
+    DESCRIPTION
+         "Added HardwareType cdLMH0387_2 (we are removing a parameter in it)"
+
+    REVISION     "201704191244Z"
+    DESCRIPTION
+        "Add support for analyzerSDIASI, that some mainboards can analyze both
+         SDI and ASI signals"
+
+    REVISION     "201703151600Z"
+    DESCRIPTION
+        "Add support for illuminated logo"
+
+    REVISION     "201610031220Z"
+    DESCRIPTION
+        "Add support for automatic change over (autosource) per output port"
+
+    REVISION     "201410131125Z"
+    DESCRIPTION
+       "Added SDI analyzer that can be enabled per input port."
+
+    REVISION     "201311201346Z"
+    DESCRIPTION
+       "Added EmbeddedNetworkManager ID. This is a uniqe identifier used by
+        the proprietary discovery protocol."
+
+    REVISION     "201311081408Z"
+    DESCRIPTION
+        "Added support for EmbeddedNetworkManager. This includes both status
+         and configuration file needed to reconfigure the IP addresses of the
+         device."
+
+    REVISION     "201310141313Z"
+    DESCRIPTION
+        "Added support for traps ( trapsTargetTable ).
+         firmwareUpgradeLastLogRowStatus was added to firmwareUpgradeLastLogTable
+         in order to support add/removal of row traps.
+         sfpSmartInfoRowStatus was added to the sfpSmartInfoTable in order to
+         to support add/removal of row traps."
+
+    REVISION     "201308211239Z"
+    DESCRIPTION
+        "Added general diagnostics. It follows the same kind of syntax as SFP
+         diagnostics. Typical usage is read out of fan speed, temperature
+         and voltages. Here the operator can also mask/select which cells will
+         cause the front LED to blink indicating warning/fault state."
+
+    REVISION     "201308091042Z"
+    DESCRIPTION
+        "Added firmwareModel and firmwareSerialNumber under the firmware
+         section"
+
+    REVISION     "201308060919Z"
+    DESCRIPTION
+        "Changed matrixInputPortNameUser and matrixOutputPortNameUser from
+         DisplayString to SnmpAdminString allowing any UTF-8 characters to be
+         used."
+
+    REVISION     "201307261337Z"
+    DESCRIPTION
+        "Added software upgrades."
+
+    REVISION     "201307041000Z"
+    DESCRIPTION
+        "Added SyncSource for the output ports in the matrix."
+
+    REVISION     "201306151330Z"
+    DESCRIPTION
+        "Initial version"
+
+--    ::= { iso(1) org(3) dod(6) internet(1) private(4) enterprises(1) 41113 }
+    ::= { enterprises 41113 }
+
+-- matrix object space is presentation of inputs and outputs, and how they are routed. Also this object space
+-- includes configuration of the ports hardware features like reclockers and equalizers.
+
+matrix OBJECT IDENTIFIER ::= {barnfind 1}
+
+-- hardware object space contains all the constants / index-values used by for instance matrix input and output
+-- ports. As new hardware appear, more and more constants will be added to this object space. Also, no object will
+-- ever be moved out of this MIB.
+
+hardware OBJECT IDENTIFIER ::= {barnfind 2}
+
+-- sfp object space contains information about the SFP modules present in the system. This object space provides
+-- both common information, diagnostics, raw configuration access aswell as configuration access to modules
+-- the current version of the system knows about.
+
+sfp OBJECT IDENTIFIER ::= {barnfind 3}
+
+firmware OBJECT IDENTIFIER ::= {barnfind 4}
+
+diagnostics OBJECT IDENTIFIER ::= {barnfind 5}
+
+traps OBJECT IDENTIFIER ::= {barnfind 6}
+
+emnema OBJECT IDENTIFIER ::= {barnfind 7}
+-- EMbedded NEtwork MAnager
+
+logo OBJECT IDENTIFIER ::= {barnfind 8}
+
+aaMadi OBJECT IDENTIFIER ::= {barnfind 9}
+
+barnfindConformance OBJECT IDENTIFIER ::= {barnfind 10}
+barnfindGroups OBJECT IDENTIFIER ::= {barnfindConformance 1}
+barnfindCompliances OBJECT IDENTIFIER ::= {barnfindConformance 2}
+
+-- Equ = Equalizer
+-- CD  = Cable Driver
+-- RC  = Reclocker
+-- Int = Internal (Built into crosspoint switch)
+-- Ext = External (Dedicated hardware)
+-- Mux = Crosspoint switch
+
+-- These boxes might appear due to                                                           These boxes might appear depending
+-- usage of special SFP modules                                                              on what features a given mux has
+-- ++++++++++++++++++++++++++                                                                ++++++++++++++++++++++++++
+--
+-- + - - - - +     + - - - -+     + - - - - - - - - - - +     + - - - - +     + - - - -+     + - - - - +     + - - - -+     + - - +
+-- | SFP Equ |>>>>>| SFP RC |>>>>>| physical-input-port |>>>>>| ext Equ |>>>>>| ext RC |>>>>>| int Equ |>>>>>| int RC |>>>>>| Mux |
+-- +- - - - -+     +- - -  -+     +- - - - - - - - - - -+     +- - - - -+     +- - - - +     +- - - - -+     +- - - - +     +- - -+
+
+
+-- These boxes might appear due to                                                                          These boxes might appear depending
+-- usage of special SFP modules                                                                             on what features a given mux has
+-- ++++++++++++++++++++++++++++++++++++++++                                                                 +++++++++++++++++++++++++
+--
+-- + - - - -+     + - - - -+     + - - - - +     + - - - - - - - - - - -+     + - - - -+     + - - - -+     + - - - -+     + - - -  +     + - - +
+-- | SFP CD |<<<<<| SFP RC |<<<<<| SFP Equ |<<<<<| physical-output-port |<<<<<| ext CD |<<<<<| ext RC |<<<<<| int CD |<<<<<| int RC |<<<<<| mux |
+-- +- - - - +     +- - - - +     +- - - - -+     +- - - - - - - - - - - +     +- - - - +     +- - - - +     +- - - - +     +- - - - +     +- - -+
+
+
+-- Here comes some basic datatypes defined used later.
+
+ FirmwareUpgradeStateType ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "The current state of the firmware upgrade engine."
+     SYNTAX       INTEGER { idle(1), idleUpdatesAvailable(2), init(3), checking(4), upgrading(5) }
+
+ HardwareType ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "A uniqe index that identifies a given hardware type (Common lookup
+          table for Equalizers, Reclockers and Cable Drivers."
+     SYNTAX       INTEGER { none(1), rcM2135x(2), eqM211x1(3), eqLMH0387(8), cdLMH0387(9), analyzerSDIOnly(10), automaticChangeOverV1(11), analyzerSDIASI(12), cdLMH0387ver2(13) }
+
+ PortIndex ::= TEXTUAL-CONVENTION
+     DISPLAY-HINT "d"
+     STATUS       current
+     DESCRIPTION
+         "This is the PortIndex for a given port."
+     SYNTAX       Integer32(1..65536)
+
+ SyncSourceIndex ::= TEXTUAL-CONVENTION
+     DISPLAY-HINT "d"
+     STATUS       current
+     DESCRIPTION
+         "This is the SyncSource for a given port. Behaves the same as PortIndex, except 65534 means analog sync source and 65535 means no sync source."
+     SYNTAX       Integer32(1..65536)
+
+ InputPortSelection ::= TEXTUAL-CONVENTION
+     DISPLAY-HINT "d"
+     STATUS       current
+     DESCRIPTION
+         "This selects a given input port. If no port is selected, the value of
+          0 should be used."
+     SYNTAX       Integer32(0..65536)
+
+ TrapTargetType ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "What kind of trap. In the future, this might include SNMPv1, INFORM etc."
+     SYNTAX       INTEGER { trapv2c(2) }
+
+ EmNeMaModeIPv4Mode ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "What mode of operation the IPv4 engine should be configured to."
+     SYNTAX       INTEGER { disabled(1), dhcp(2), static(3), linklocal(4)}
+
+ EmNeMaModeIPv6Mode ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "What mode of operation the IPv6 engine should be configured to."
+     SYNTAX       INTEGER { linklocal(1), linklocalAndDhcpv6(2), linklocalAndStatic(3), linklocalAndRouterAnnouncement(4)}
+
+ DisplayStringLong ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "2048a"
+    STATUS       current
+    DESCRIPTION
+            "Same as DisplayString, only bigger"
+    SYNTAX       OCTET STRING (SIZE (0..2048))
+
+ EmnemaIDString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1x 1x 1x 1x 1x 1x"
+    STATUS       current
+    DESCRIPTION
+            "Binary ID"
+    SYNTAX       OCTET STRING (SIZE (6))
+
+ AAMadiClockRangeType ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "Sets the clock-range mode for the card. It can work in either 1 FS or 2 FS mode."
+     SYNTAX INTEGER { range1FS(1), range2FS(2)}
+
+ AAMadiClockSourceType ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "Sets the clock-source for the card."
+     SYNTAX INTEGER { internal44K(1), internal48K(2), clockMADI1(3), clockMADI2(4), clockMADI3(5), clockMADI4(6)}
+
+ AAMadiRateType ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "The clock speed"
+     SYNTAX INTEGER { clock48K(48), clock96K(96)}
+
+ AAMadiChannelsCountType ::= TEXTUAL-CONVENTION
+     STATUS       current
+     DESCRIPTION
+         "The clock speed"
+     SYNTAX INTEGER { channels56(56), channels64(64)}
+
+ matrixInputPortTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF MatrixInputPortEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "This is the status/configuration of the inputs that are available."
+     ::= {matrix 1}
+
+ matrixInputPortEntry OBJECT-TYPE
+     SYNTAX      MatrixInputPortEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "An entry containing status/configuration of a given input."
+     INDEX       { matrixInputPortIndex }
+     ::= {matrixInputPortTable 1}
+
+ MatrixInputPortEntry ::= SEQUENCE {
+     matrixInputPortIndex                      PortIndex,
+     matrixInputPortName                       DisplayString, -- Bidirectional ports will have the same name
+     matrixInputPortNameUser                   SnmpAdminString,
+     matrixInputPortLogoUser                   OCTET STRING, -- Icon, upto 64K
+
+     matrixInputPortExtEqualizerType           HardwareType,
+     matrixInputPortExtEqualizerParameters     DisplayString,
+     matrixInputPortExtEqualizerSignalDetected TruthValue,
+
+     matrixInputPortExtReclockerType           HardwareType,
+     matrixInputPortExtReclockerParameters     DisplayString,
+     matrixInputPortExtReclockerLock           DisplayString,
+     matrixInputPortExtReclockerSignalDetected TruthValue,
+
+     matrixInputPortIntEqualizerType           HardwareType,
+     matrixInputPortIntEqualizerParameters     DisplayString,
+     matrixInputPortIntEqualizerSignalDetected TruthValue,
+
+     matrixInputPortIntReclockerType           HardwareType,
+     matrixInputPortIntReclockerParameters     DisplayString,
+     matrixInputPortIntReclockerLock           DisplayString,
+     matrixInputPortIntReclockerSignalDetected TruthValue,
+
+     matrixInputPortAnalyzerType               HardwareType,
+     matrixInputPortAnalyzerParameters         DisplayString,
+     matrixInputPortAnalyzerSignalDetected     TruthValue
+ }
+
+ matrixInputPortIndex OBJECT-TYPE
+     SYNTAX      PortIndex(1..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index of the port."
+     ::= { matrixInputPortEntry 1 }
+
+ matrixInputPortName OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..255))
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The name of the port as it appears on the silkprint. Examples can be
+          Coax input 1."
+     ::= { matrixInputPortEntry 2 }
+
+ matrixInputPortNameUser OBJECT-TYPE
+     SYNTAX      SnmpAdminString (SIZE (0..255))
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "A name the user selects. Example usage can be <Camera 1>, <BBC> or <Fiber 13>."
+     ::= { matrixInputPortEntry 3 }
+
+ matrixInputPortLogoUser OBJECT-TYPE
+     SYNTAX      OCTET STRING (SIZE (0..65535))
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Here, the user can store a logo which represents the input. Image is limited to 64K by SNMP protocol."
+     ::= { matrixInputPortEntry 4 }
+
+ matrixInputPortExtEqualizerType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of equalizer is present between the port and the mux (Hardware is None if not available)."
+     ::= { matrixInputPortEntry 5 }
+
+ matrixInputPortExtEqualizerParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the external equalizer."
+     ::= { matrixInputPortEntry 6 }
+
+ matrixInputPortExtEqualizerSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixInputPortEntry 7 }
+
+ matrixInputPortExtReclockerType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of reclocker is present between the port and the mux (Hardware is None if not available)."
+     ::= { matrixInputPortEntry 8 }
+
+ matrixInputPortExtReclockerParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the external reclocker."
+     ::= { matrixInputPortEntry 9 }
+
+ matrixInputPortExtReclockerLock OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "n;m
+          n: Is the reclocker locked on the signal? If reclocked reports locked
+          signal, 1 will return here. A disabled / unlocked reclocker will
+          return 2 here.
+          m: Which frequency is the reclocker locked at (Given in KHz, so 10Ghz
+          will be represented as 10000000). The number present here might also
+          be a dummy or rought estimate if the reclocker does not provide the
+          information needed to calculate this."
+     ::= { matrixInputPortEntry 10 }
+
+ matrixInputPortExtReclockerSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixInputPortEntry 11 }
+
+ matrixInputPortIntEqualizerType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of equalizer is present inside the mux (Hardware is None if not available)."
+     ::= { matrixInputPortEntry 12 }
+
+ matrixInputPortIntEqualizerParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the internal equalizer"
+     ::= { matrixInputPortEntry 13 }
+
+ matrixInputPortIntEqualizerSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixInputPortEntry 14 }
+
+ matrixInputPortIntReclockerType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of reclocker is present inside the mux (Hardware is None if not available)."
+     ::= { matrixInputPortEntry 15 }
+
+ matrixInputPortIntReclockerParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the internal reclocker."
+     ::= { matrixInputPortEntry 16 }
+
+ matrixInputPortIntReclockerLock OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "n;m
+          n: Is the reclocker locked on the signal? If reclocked reports locked
+          signal, 1 will return here. A disabled / unlocked reclocker will
+          return 2 here.
+          m: Which frequency is the reclocker locked at (Given in KHz, so 10Ghz
+          will be represented as 10000000). The number present here might also
+          be a dummy or rought estimate if the reclocker does not provide the
+          information needed to calculate this."
+     ::= { matrixInputPortEntry 17 }
+
+ matrixInputPortIntReclockerSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixInputPortEntry 18 }
+
+ matrixInputPortAnalyzerType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The hardware type should always be 10, which have a special meening."
+     ::= { matrixInputPortEntry 19 }
+
+ matrixInputPortAnalyzerParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "This hardware object does not have the normal
+          number;number;number;number syntax, but Enum;string;string;string .
+          The enum should be 1:'SDI analyzer' and 2:'Do not analyze'.
+          String 1: Raw output of the detected format
+          String 2: What signal standard that this signal follows
+          String 3: Errors detected:
+              NOSIGNAL - No signal detected
+              EAV - End of Active Video error
+              SAV - Start of Active Video error
+              LineNo - Line number error
+              CRC-Luma - CRC error in Luma
+              CRC-Chroma - CRC error in Chroma
+              CRC-ANC-Luma - CRC error in ancillary luma data
+              CRC-ANC-Chroma - CRC error in ancillary chroma data
+              CRC-EDH-ActivePicture - EDH present, but fails in active picture
+              CRC-EDH-FullPicture - EDH present, but fails for the full picture
+              VideoStandard - VideoStandard failure."
+     ::= { matrixInputPortEntry 20 }
+
+ matrixInputPortAnalyzerSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is disabled
+          this feature, this will always return the value of the parents of the
+          signal."
+     ::= { matrixInputPortEntry 21 }
+
+ matrixOutputPortTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF MatrixOutputPortEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "This is the status/configuration of the outputs that are available."
+     ::= {matrix 2}
+
+ matrixOutputPortEntry OBJECT-TYPE
+     SYNTAX      MatrixOutputPortEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "An entry containing status/configuration of a given output."
+     INDEX       { matrixOutputPortIndex }
+     ::= {matrixOutputPortTable 1}
+
+ MatrixOutputPortEntry ::= SEQUENCE {
+     matrixOutputPortIndex                        PortIndex,
+     matrixOutputPortName                         DisplayString, -- Bidirectional ports will have the same name
+     matrixOutputPortNameUser                     SnmpAdminString,
+     matrixOutputPortLogoUser                     OCTET STRING, -- Icon, upto 64K
+
+     matrixOutputPortInputPort                    InputPortSelection,
+
+     matrixOutputPortIntReclockerType             HardwareType,
+     matrixOutputPortIntReclockerParameters       DisplayString,
+     matrixOutputPortIntReclockerLock             DisplayString,
+     matrixOutputPortIntReclockerSignalDetected   TruthValue,
+
+     matrixOutputPortIntCableDriverType           HardwareType,
+     matrixOutputPortIntCableDriverParameters     DisplayString,
+     matrixOutputPortIntCableDriverSignalDetected TruthValue,
+
+     matrixOutputPortExtReclockerType             HardwareType,
+     matrixOutputPortExtReclockerParameters       DisplayString,
+     matrixOutputPortExtReclockerLock             DisplayString,
+     matrixOutputPortExtReclockerSignalDetected   TruthValue,
+
+     matrixOutputPortExtCableDriverType           HardwareType,
+     matrixOutputPortExtCableDriverParameters     DisplayString,
+     matrixOutputPortExtCableDriverSignalDetected TruthValue,
+
+     matrixOutputPortSyncSource                   SyncSourceIndex,
+     matrixOutputPortAutoChangeOverType           HardwareType,
+     matrixOutputPortAutoChangeOverParameters     DisplayString
+}
+
+ matrixOutputPortIndex OBJECT-TYPE
+     SYNTAX PortIndex(1..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index of the port."
+     ::= { matrixOutputPortEntry 1 }
+
+ matrixOutputPortName OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..255))
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The name of the port as it appears on the silkprint. Examples can be
+          Coax output 1."
+     ::= { matrixOutputPortEntry 2 }
+
+ matrixOutputPortNameUser OBJECT-TYPE
+     SYNTAX SnmpAdminString (SIZE (0..255))
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "A name the user selects. Example usage can be <Monitor 1>, <BBC> or <Fiber 13>."
+     ::= { matrixOutputPortEntry 3 }
+
+ matrixOutputPortLogoUser OBJECT-TYPE
+     SYNTAX OCTET STRING (SIZE (0..65535))
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Here, the user can store a logo which represents the output. Image is limited to 64K by SNMP protocol."
+     ::= { matrixOutputPortEntry 4 }
+
+ matrixOutputPortInputPort OBJECT-TYPE
+     SYNTAX      InputPortSelection
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Which input should this output be connected to."
+     ::= { matrixOutputPortEntry 5 }
+
+ matrixOutputPortIntReclockerType OBJECT-TYPE
+     SYNTAX HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of reclocker is present inside the mux (Hardware is None if not available)."
+     ::= { matrixOutputPortEntry 6 }
+
+ matrixOutputPortIntReclockerParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the internal reclocker."
+     ::= { matrixOutputPortEntry 7 }
+
+ matrixOutputPortIntReclockerLock OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "n;m
+          n: Is the reclocker locked on the signal? If reclocked reports locked
+          signal, 1 will return here. A disabled / unlocked reclocker will
+          return 2 here.
+          m: Which frequency is the reclocker locked at (Given in KHz, so 10Ghz
+          will be represented as 10000000). The number present here might also
+          be a dummy or rought estimate if the reclocker does not provide the
+          information needed to calculate this."
+     ::= { matrixOutputPortEntry 8 }
+
+ matrixOutputPortIntReclockerSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixOutputPortEntry 9 }
+
+ matrixOutputPortIntCableDriverType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of cable driver is present inside the mux (Hardware is None if not available)."
+     ::= { matrixOutputPortEntry 10 }
+
+ matrixOutputPortIntCableDriverParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the internal cable driver."
+     ::= { matrixOutputPortEntry 11 }
+
+ matrixOutputPortIntCableDriverSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixOutputPortEntry 12 }
+
+ matrixOutputPortExtReclockerType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of reclocker is present between the mux and the port (Hardware is None if not available)."
+     ::= { matrixOutputPortEntry 13 }
+
+ matrixOutputPortExtReclockerParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the external reclocker."
+     ::= { matrixOutputPortEntry 14 }
+
+ matrixOutputPortExtReclockerLock OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "n;m
+          n: Is the reclocker locked on the signal? If reclocked reports locked
+          signal, 1 will return here. A disabled / unlocked reclocker will
+          return 2 here.
+          m: Which frequency is the reclocker locked at (Given in KHz, so 10Ghz
+          will be represented as 10000000). The number present here might also
+          be a dummy or rought estimate if the reclocker does not provide the
+          information needed to calculate this."
+     ::= { matrixOutputPortEntry 15 }
+
+ matrixOutputPortExtReclockerSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixOutputPortEntry 16 }
+
+ matrixOutputPortExtCableDriverType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of cable driver is present between the mux and the port (Hardware is None if not available)."
+     ::= { matrixOutputPortEntry 17 }
+
+ matrixOutputPortExtCableDriverParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the external cable driver."
+     ::= { matrixOutputPortEntry 18 }
+
+ matrixOutputPortExtCableDriverSignalDetected OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Does the hardware detect a signal. If hardware is missing
+          this feature, this will always return the value of the parents of the
+          signal, and if that is not available the value of the children we be
+          used."
+     ::= { matrixOutputPortEntry 19 }
+
+ matrixOutputPortSyncSource OBJECT-TYPE
+     SYNTAX      SyncSourceIndex
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "The genlock sync source used for this output."
+     ::= { matrixOutputPortEntry 20 }
+
+ matrixOutputPortAutoChangeOverType OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What kind of automatic source is present for this port (Hardware is None if not available)."
+     ::= { matrixOutputPortEntry 21 }
+
+ matrixOutputPortAutoChangeOverParameters OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Numeric parameters separated by ; for the external automatic source."
+     ::= { matrixOutputPortEntry 22 }
+
+-- Here comes the table for lookup information about the hardware-types that
+-- might be present in this unit. As new reclockers, cable-drivers and
+-- equlizers are added in the future, they will be assigned new uniqe
+-- identifiers.
+
+ hardwareTypeTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF HardwareTypeEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "The list of hardware types that this unit knows about"
+     ::= {hardware 1}
+
+ hardwareTypeEntry OBJECT-TYPE
+     SYNTAX      HardwareTypeEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing information about a given reclocker."
+     INDEX       {hardwareTypeIndex}
+     ::= {hardwareTypeTable 1}
+
+ HardwareTypeEntry ::= SEQUENCE {
+         hardwareTypeIndex      HardwareType,
+         hardwareTypeName       DisplayString
+ }
+
+ hardwareTypeIndex OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index of the given hardware type."
+     ::= {hardwareTypeEntry 1}
+
+ hardwareTypeName OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The name of the given hardware type."
+     ::= {hardwareTypeEntry 2}
+
+-- Here comes the table for lookup information about the different parameters
+-- that can be configured on the given hardware types.
+
+ hardwareTypeParameterTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF HardwareTypeParameterTableEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The list of the parameters that can be configured on all of the
+          hardware types."
+     ::= {hardware 2}
+
+ hardwareTypeParameterTableEntry OBJECT-TYPE
+     SYNTAX      HardwareTypeParameterTableEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "An entry containing information about about a hardware type parameter."
+     INDEX       {hardwareTypeParameterHardwareTypeIndex, hardwareTypeParameterIndex}
+     ::= {hardwareTypeParameterTable 1}
+
+ HardwareTypeParameterTableEntry ::= SEQUENCE {
+         hardwareTypeParameterHardwareTypeIndex   HardwareType,
+         hardwareTypeParameterIndex               Integer32,
+         hardwareTypeParameterName                DisplayString,
+         hardwareTypeParameterSyntax              DisplayString
+ }
+
+ hardwareTypeParameterHardwareTypeIndex OBJECT-TYPE
+     SYNTAX      HardwareType
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The index for hardware type."
+     ::= {hardwareTypeParameterTableEntry 1}
+
+ hardwareTypeParameterIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..2147483647)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index, allowing multiple parameters for each hardware type."
+     ::= {hardwareTypeParameterTableEntry 2}
+
+ hardwareTypeParameterName OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The name of the parameter."
+     ::= {hardwareTypeParameterTableEntry 3}
+
+ hardwareTypeParameterSyntax OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+          "The syntax for the value:
+          wB for boolean (0 for unset, 1 for true, 2 for false). A writable boolean will normally fail if you try to set it 0
+          wI for integer. This might be followed by options to give it scaling, suffix, etc.: I;scale=0.1;min=-100;max=200;offset=10;suffix=mW
+          wE;1=option1;2=option2 E for enumeration with the possible values as options."
+     ::= {hardwareTypeParameterTableEntry 4}
+
+ sfpCommonInfoTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF SfpCommonInfoEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "The list of common information available from the SFP modules"
+     ::= {sfp 1}
+
+ sfpCommonInfoEntry OBJECT-TYPE
+     SYNTAX      SfpCommonInfoEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing common information about a given SFP module."
+     INDEX       {sfpCommonInfoIndex}
+     ::= {sfpCommonInfoTable 1}
+
+ SfpCommonInfoEntry ::= SEQUENCE {
+         sfpCommonInfoIndex              PortIndex,
+         sfpCommonInfoPortName           DisplayString,
+         sfpCommonInfoPresent            TruthValue,
+         sfpCommonInfoConnector          DisplayString,
+         sfpCommonInfoLengths            DisplayString,
+         sfpCommonInfoVendorName         DisplayString,
+         sfpCommonInfoPartNumber         DisplayString,
+         sfpCommonInfoSerialNumber       DisplayString,
+         sfpCommonInfoProductionDate     Integer32,
+         sfpCommonInfoProductionLot      DisplayString,
+         sfpCommonInfoRevision           DisplayString,
+         sfpCommonInfoWaveLengthNm       Integer32,
+         sfpCommonInfoBitRate            DisplayString
+ }
+
+ sfpCommonInfoIndex OBJECT-TYPE
+     SYNTAX      PortIndex(1..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the table. This index will match for the given SFP input numbers."
+     ::= {sfpCommonInfoEntry 1}
+
+ sfpCommonInfoPortName OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The name of port. This matches the names used in the matrix."
+     ::= {sfpCommonInfoEntry 2}
+
+ sfpCommonInfoPresent OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "This reads are true if a SFP module is present in the port, and it is
+          operational."
+     ::= {sfpCommonInfoEntry 3}
+
+ sfpCommonInfoConnector OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The connector present on module, if detectable. Samples of names are LC, SC and RJ45."
+     ::= {sfpCommonInfoEntry 4}
+
+ sfpCommonInfoLengths OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "a;b;c;d;e;f
+		 Example:
+		 10000;0;0;0;0
+		 a - How many meters of SingleMode fiber the SFP module claims that it supports.
+		 b - How many meters of MultiMode 62.5um OM1 fiber the SFP module claims that it supports.
+		 c - How many meters of MultiMode 50um OM2 fiber the SFP module claims that it supports.
+		 d - How many meters of MultiMode 50um OM3 fiber the SFP module claims that it supports.
+		 e - How many meters of copper cable the SFP module claims that it supports.
+		 f - How many meters of MultiMode OM4 fiber the SFP module claims that it supports (This value is not visible on older versions of the firmware)
+		 "
+     ::= {sfpCommonInfoEntry 5}
+
+ sfpCommonInfoVendorName OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What is the name of the vendor. If only IEEE Company ID (OUI) is
+          available, this will be used instead."
+     ::= {sfpCommonInfoEntry 6}
+
+ sfpCommonInfoPartNumber OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "What is the part-number assigned by the vendor."
+     ::= {sfpCommonInfoEntry 7}
+
+ sfpCommonInfoSerialNumber OBJECT-TYPE
+     SYNTAX       DisplayString
+     MAX-ACCESS   read-only
+     STATUS       current
+     DESCRIPTION
+         "What is the serial-number assigned by the vendor (alfa-numerical)."
+     ::= {sfpCommonInfoEntry 8}
+
+ sfpCommonInfoProductionDate OBJECT-TYPE
+     SYNTAX       Integer32
+     MAX-ACCESS   read-only
+     STATUS       current
+     DESCRIPTION
+         "The production date of the part. This number is formated as YYYYMMDD."
+     ::= {sfpCommonInfoEntry 9}
+
+ sfpCommonInfoProductionLot OBJECT-TYPE
+     SYNTAX       DisplayString
+     MAX-ACCESS   read-only
+     STATUS       current
+     DESCRIPTION
+         "This is the production lot if given. It can be combined with the
+          production date to find the uniq production lot."
+     ::= {sfpCommonInfoEntry 10}
+
+ sfpCommonInfoRevision OBJECT-TYPE
+     SYNTAX       DisplayString
+     MAX-ACCESS   read-only
+     STATUS       current
+     DESCRIPTION
+         "The revision assigned by the vendor (Can be combined the Part Number
+          too get the uniq product type."
+     ::= {sfpCommonInfoEntry 11}
+
+ sfpCommonInfoWaveLengthNm OBJECT-TYPE
+     SYNTAX       Integer32
+     MAX-ACCESS   read-only
+     STATUS       current
+     DESCRIPTION
+         "This is the laser wavelength if available."
+     ::= {sfpCommonInfoEntry 12}
+
+ sfpCommonInfoBitRate OBJECT-TYPE
+     SYNTAX       DisplayString
+     MAX-ACCESS   read-only
+     STATUS       current
+     DESCRIPTION
+         "a;b;c
+          a - This is the nominal BitRate given in KHz.
+          b - This is minimum recommended bitrate from the vendor in KHz.
+          c - This is maximum recommended bitrate from the vendor in KHz."
+     ::= {sfpCommonInfoEntry 13}
+
+ sfpSmartInfoTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF SfpSmartInfoEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "The list of live (diagnostics) information available from the SFP modules"
+     ::= {sfp 2}
+
+ sfpSmartInfoEntry OBJECT-TYPE
+     SYNTAX      SfpSmartInfoEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing live information about a given SFP module."
+     INDEX       {sfpSmartInfoPortIndex, sfpSmartInfoIndex}
+     ::= {sfpSmartInfoTable 1}
+
+ SfpSmartInfoEntry ::= SEQUENCE {
+         sfpSmartInfoPortIndex              PortIndex,
+         sfpSmartInfoIndex                  Integer32,
+         sfpSmartInfoName                   DisplayString,
+         sfpSmartInfoValueSyntax            DisplayString,
+         sfpSmartInfoValue                  DisplayString,
+         sfpSmartInfoRowStatus              RowStatus
+ }
+
+ sfpSmartInfoPortIndex OBJECT-TYPE
+     SYNTAX      PortIndex(1..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal port-index for the table. This index will match for the given SFP input numbers."
+     ::= {sfpSmartInfoEntry 1}
+
+ sfpSmartInfoIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..2147483647)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal sub-index for the table. This index will match for the given SFP input numbers."
+     ::= {sfpSmartInfoEntry 2}
+
+ sfpSmartInfoName OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The name of the Value."
+     ::= {sfpSmartInfoEntry 3}
+
+ sfpSmartInfoValueSyntax OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The syntax for the value:
+          First character is w or r do indicate read/write or read-only. So a complete example for below is
+          wB     writeable boolean
+          rB     readable boolean
+          B for boolean (0 for unset, 1 for true, 2 for false). A writable boolean will normally fail if you try to set it 0
+          I for integer. This might be followed by options to give it scaling,
+          warnings and error limits and suffix: I;scale=0.1;wmin=10;wmax=100;emin=0;emax=110;min=-100;max=200;offset=10;suffix=mW
+          E;1=option1;2=option2 E for enumeration with the possible values as options
+          IPv4 For an IPv4 address.
+          IPv4Net For an IPv4 address with prefix (192.168.0.255/24)
+          IPv6 For an IPv6 address.
+          IPv6Net for an IPv6 address with prefix.
+          IP For an IPv4 or IPv6 address.
+          IPNet For an IPv4 or IPv6 address.
+          S;len=x String, up len long."
+     ::= {sfpSmartInfoEntry 4}
+
+ sfpSmartInfoValue OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "The value as a string."
+     ::= {sfpSmartInfoEntry 5}
+
+ sfpSmartInfoRowStatus OBJECT-TYPE
+     SYNTAX      RowStatus
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Read only RowStatus. Used by traps to indicate creation / removal of rows."
+     ::= {sfpSmartInfoEntry 6}
+
+firmwareUpgrade OBJECT IDENTIFIER ::= {firmware 1}
+
+firmwareUpgradeState OBJECT-TYPE
+     SYNTAX      FirmwareUpgradeStateType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The current state of the firmware upgrade engine."
+     ::= {firmwareUpgrade 1}
+
+firmwareUpgradeTriggerCheck OBJECT-TYPE
+     SYNTAX      Integer32(0..65536)
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Write a non-zero value to trigger a check for new updates."
+     ::= {firmwareUpgrade 2}
+
+firmwareUpgradeTriggerUpgrade OBJECT-TYPE
+     SYNTAX      Integer32(0..65536)
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Write a non-zero value to trigger installation of the new discovered updates."
+     ::= {firmwareUpgrade 3}
+
+firmwareUpgradeLastLogTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF FirmwareUpgradeLastLogEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "The log from the last action performed by the firmware upgrade engine."
+     ::= {firmwareUpgrade 4}
+
+ firmwareUpgradeLastLogEntry OBJECT-TYPE
+     SYNTAX      FirmwareUpgradeLastLogEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing a single from the log from the last action performed by the firmware upgrade engine."
+     INDEX {firmwareUpgradeLastLogIndex}
+     ::= {firmwareUpgradeLastLogTable 1}
+
+ FirmwareUpgradeLastLogEntry ::= SEQUENCE {
+         firmwareUpgradeLastLogIndex        Integer32,
+         firmwareUpgradeLastLogLine         DisplayString,
+         firmwareUpgradeLastLogRowStatus    RowStatus
+ }
+
+ firmwareUpgradeLastLogIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..4096)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the firmwareUpgradeLastLogTable."
+     ::= {firmwareUpgradeLastLogEntry 1}
+
+ firmwareUpgradeLastLogLine OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "A chunk of text representing a single line from the log from the last action performed by the firmware upgrade engine."
+     ::= {firmwareUpgradeLastLogEntry 2}
+
+ firmwareUpgradeLastLogRowStatus OBJECT-TYPE
+     SYNTAX      RowStatus
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "read-only RowStatus. Used by traps to indicate when lines are removed."
+     ::= {firmwareUpgradeLastLogEntry 3}
+
+ firmwareSerialNumber OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The serial number for the given unit."
+     ::= {firmware 2}
+
+ firmwareModel OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The model the given unit."
+     ::= {firmware 3}
+
+ diagnosticsTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF DiagnosticsEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "A list of diagnostic variables (fan speed, temperatures, voltages, etc)."
+     ::= {diagnostics 1}
+
+ diagnosticsEntry OBJECT-TYPE
+     SYNTAX      DiagnosticsEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing a single diagnostics variable."
+     INDEX {diagnosticsIndex}
+     ::= {diagnosticsTable 1}
+
+ DiagnosticsEntry ::= SEQUENCE {
+     diagnosticsIndex        Integer32,
+     diagnosticsName         DisplayString,
+     diagnosticsSyntax       DisplayString,
+     diagnosticsValue        DisplayString,
+     diagnosticsSendToLED    TruthValue
+ }
+
+ diagnosticsIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the diagnosticsTable."
+     ::= {diagnosticsEntry 1}
+
+ diagnosticsName OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The name of the entry"
+     ::= {diagnosticsEntry 2}
+
+ diagnosticsSyntax OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The syntax for the value: (for now this only can contain rI;... entries, read-only integers
+
+          I for integer. This might be followed by options to give it scaling,
+          warnings and error limits and suffix: I;scale=0.1;wmin=10;wmax=100;emin=0;emax=110;min=-100;max=200;offset=10;suffix=mW"
+     ::= {diagnosticsEntry 3}
+
+ diagnosticsValue OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The current value for the given diagnostics entry."
+     ::= {diagnosticsEntry 4}
+
+ diagnosticsSendToLED OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "If this is set to True(1), this entry can cause the fault LED diode to blink/light up
+          if a warning/error is detected."
+     ::= {diagnosticsEntry 5}
+
+ trapsTargetTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF TrapsTargetEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "A list of diagnostic variables (fan speed, temperatures, voltages, etc)."
+     ::= {traps 1}
+
+ trapsTargetEntry OBJECT-TYPE
+     SYNTAX      TrapsTargetEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing a single diagnostics variable."
+     INDEX {trapsTargetIndex}
+     ::= {trapsTargetTable 1}
+
+ TrapsTargetEntry ::= SEQUENCE {
+     trapsTargetIndex        Integer32,
+     trapsTargetRowStatus    RowStatus,
+     trapsTargetType         TrapTargetType,
+     trapsTargetHostType     InetAddressType,
+     trapsTargetHost         InetAddress,
+     trapsTargetPort         Integer32,
+     trapsTargetStatus       TruthValue,
+     trapsTargetConfig       TruthValue,
+     trapsTargetSFPDiag      TruthValue,
+     trapsTargetEmnema       TruthValue
+ }
+
+ trapsTargetIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the trapsTargetTable."
+     ::= {trapsTargetEntry 1}
+
+ trapsTargetRowStatus OBJECT-TYPE
+     SYNTAX      RowStatus
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "RowStatus. Makes it possible to add/remove entries in the table"
+     ::= {trapsTargetEntry 2}
+
+ trapsTargetType OBJECT-TYPE
+     SYNTAX      TrapTargetType
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "What kind of trap do you want. Initially we only support SNMP version 2c traps"
+     ::= {trapsTargetEntry 3}
+
+-- Needs fixing TODO WARNING ERROR
+
+ trapsTargetHostType OBJECT-TYPE
+     SYNTAX      InetAddressType
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "IP address type you want to send traps to. Can be IPv4 or IPv6"
+     ::= {trapsTargetEntry 4}
+
+ trapsTargetHost OBJECT-TYPE
+     SYNTAX      InetAddress
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "IP address you want to send traps to."
+     ::= {trapsTargetEntry 5}
+
+ trapsTargetPort OBJECT-TYPE
+     SYNTAX      Integer32(1..65534)
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "What port do you want to the traps sent to. Default is 162"
+     ::= {trapsTargetEntry 6}
+
+  trapsTargetStatus OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "Do you want to receive traps about (hardware) status changes"
+     ::= {trapsTargetEntry 7}
+
+  trapsTargetConfig OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "Do you want to receive traps about (hardware) configuration changes"
+     ::= {trapsTargetEntry 8}
+
+  trapsTargetSFPDiag OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "Do you want to receive traps about SFP diagnostics data changes (TODO rows go away)"
+     ::= {trapsTargetEntry 9}
+
+  trapsTargetEmnema OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-create
+     STATUS      current
+     DESCRIPTION
+         "Do you want to receive traps about emnema data changes"
+     ::= {trapsTargetEntry 10}
+
+-- trapsContainer is needed to make it possible to convert to Traps V1 in the future.
+-- This also removes some warnings from MIB validation tools.
+  trapsContainer OBJECT IDENTIFIER ::= {traps 0}
+
+  statusTrap NOTIFICATION-TYPE
+    STATUS current
+--      OBJECTS { barnfind }
+    DESCRIPTION "Common trap for all (hardware) status changes. Any kind of OID might be attached."
+        ::= { trapsContainer 1 }
+
+  configTrap NOTIFICATION-TYPE
+    STATUS current
+--      OBJECTS { barnfind }
+    DESCRIPTION "Common trap for all (hardware) configuration changes. Any kind of OID might be attached."
+        ::= { trapsContainer 2 }
+
+  sfpDiagTrap NOTIFICATION-TYPE
+	STATUS current
+--      OBJECTS { barnfind }
+	DESCRIPTION "Common trap for all sfp-diagnostics changes. Any kind of OID might be attached."
+        ::= { trapsContainer 3 }
+
+  emnemaTrap NOTIFICATION-TYPE
+    STATUS current
+--      OBJECTS { barnfind }
+    DESCRIPTION "Common trap for all emnema status and configuration changes."
+        ::= { trapsContainer 4 }
+
+
+ emnemaStatusIPTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF EmnemaStatusIPEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "A list of IP addresses that is currently assigned to this device."
+     ::= {emnema 1}
+
+ emnemaStatusIPEntry OBJECT-TYPE
+     SYNTAX      EmnemaStatusIPEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing a single diagnostics variable."
+     INDEX {emnemaStatusIPIndex}
+     ::= {emnemaStatusIPTable 1}
+
+ EmnemaStatusIPEntry ::= SEQUENCE {
+     emnemaStatusIPIndex       Integer32,
+     emnemaStatusIPRowStatus   RowStatus,
+     emnemaStatusIPAddressType InetAddressType,
+     emnemaStatusIPAddress     InetAddress,
+     emnemaStatusIPNetmask     InetAddressPrefixLength,
+     emnemaStatusIPDevice      DisplayString
+ }
+
+ emnemaStatusIPIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the emnemaStatusIPTable."
+     ::= {emnemaStatusIPEntry 1}
+
+ emnemaStatusIPRowStatus OBJECT-TYPE
+     SYNTAX      RowStatus
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Read only RowStatus. Used by traps do indicate creation/removal of rows in the table."
+     ::= {emnemaStatusIPEntry 2}
+
+ emnemaStatusIPAddressType OBJECT-TYPE
+     SYNTAX      InetAddressType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Address type. Can be ipv4 or ipv6"
+     ::= {emnemaStatusIPEntry 3}
+
+ emnemaStatusIPAddress OBJECT-TYPE
+     SYNTAX      InetAddress
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "An IP address. Both IPv4 and IPv6 addresses can appear here."
+     ::= {emnemaStatusIPEntry 4}
+
+ emnemaStatusIPNetmask OBJECT-TYPE
+     SYNTAX      InetAddressPrefixLength
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "An IP address. Both IPv4 and IPv6 addresses can appear here."
+     ::= {emnemaStatusIPEntry 5}
+
+ emnemaStatusIPDevice OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Which network interface is this IP address assigned to"
+     ::= {emnemaStatusIPEntry 6}
+
+ emnemaStatusRouteTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF EmnemaStatusRouteEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "The routing table that is currently assigned to this device."
+     ::= {emnema 2}
+
+ emnemaStatusRouteEntry OBJECT-TYPE
+     SYNTAX      EmnemaStatusRouteEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing a single diagnostics variable."
+     INDEX {emnemaStatusRouteIndex}
+     ::= {emnemaStatusRouteTable 1}
+
+ EmnemaStatusRouteEntry ::= SEQUENCE { -- one to one compatible with the emnema route packets
+     emnemaStatusRouteIndex              Integer32,
+     emnemaStatusRouteRowStatus          RowStatus,
+     emnemaStatusRouteDevice             DisplayString,
+     emnemaStatusRouteAddressType        InetAddressType,
+     emnemaStatusRouteSourceAddress      InetAddress,
+     emnemaStatusRouteSourceNetmask      InetAddressPrefixLength,
+     emnemaStatusRouteDestinationAddress InetAddress,
+     emnemaStatusRouteDestinationNetmask InetAddressPrefixLength,
+     emnemaStatusRouteGateway            InetAddress,
+     emnemaStatusRoutePriority           Integer32
+ }
+
+ emnemaStatusRouteIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..65536)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the emnemaStatusRouteTable."
+     ::= {emnemaStatusRouteEntry 1}
+
+ emnemaStatusRouteRowStatus OBJECT-TYPE
+     SYNTAX      RowStatus
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Read only RowStatus. Used by traps do indicate creation/removal of rows in the table."
+     ::= {emnemaStatusRouteEntry 2}
+
+ emnemaStatusRouteDevice OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..15))
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The device this route will use"
+     ::= {emnemaStatusRouteEntry 3}
+
+  emnemaStatusRouteAddressType OBJECT-TYPE
+     SYNTAX      InetAddressType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Address type for this route. Can either be ipv4 or ipv6."
+     ::= {emnemaStatusRouteEntry 4}
+
+  emnemaStatusRouteSourceAddress OBJECT-TYPE
+     SYNTAX      InetAddress
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Source address for this route (if any)."
+     ::= {emnemaStatusRouteEntry 5}
+
+ emnemaStatusRouteSourceNetmask OBJECT-TYPE
+     SYNTAX      InetAddressPrefixLength
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The netmask for the source address for this route. 0 means no source address was given."
+     ::= {emnemaStatusRouteEntry 6}
+
+ emnemaStatusRouteDestinationAddress OBJECT-TYPE
+     SYNTAX      InetAddress
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Destination address for this route (if any)."
+     ::= {emnemaStatusRouteEntry 7}
+
+ emnemaStatusRouteDestinationNetmask OBJECT-TYPE
+     SYNTAX      InetAddressPrefixLength
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The netmask for the destination address for this route. 0 means no source address was given."
+     ::= {emnemaStatusRouteEntry 8}
+
+ emnemaStatusRouteGateway OBJECT-TYPE
+     SYNTAX      InetAddress
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Gateway for this route (if any)."
+     ::= {emnemaStatusRouteEntry 9}
+
+ emnemaStatusRoutePriority OBJECT-TYPE
+     SYNTAX      Integer32(0..65535)
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Priority of this route."
+     ::= {emnemaStatusRouteEntry 10}
+
+ emnemaLogTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF EmnemaLogEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "The log from EmNeMa processes."
+     ::= {emnema 3}
+
+ emnemaLogEntry OBJECT-TYPE
+     SYNTAX      EmnemaLogEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing a single diagnostics variable."
+     INDEX {emnemaLogIndex}
+     ::= {emnemaLogTable 1}
+
+ EmnemaLogEntry ::= SEQUENCE { -- one to one compatible with the emnema route packets
+     emnemaLogIndex              Integer32,
+     emnemaLogRowStatus          RowStatus,
+     emnemaLogSource             DisplayString,
+     emnemaLogChannel            DisplayString,
+     emnemaLogData               DisplayString
+ }
+
+ emnemaLogIndex OBJECT-TYPE
+     SYNTAX      Integer32(1..2147483647)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the emnemaLogTable. This will count from 1
+          every time a device reboots."
+     ::= {emnemaLogEntry 1}
+
+ emnemaLogRowStatus OBJECT-TYPE
+     SYNTAX      RowStatus
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Read only RowStatus. Used by traps do indicate creation of rows in
+          the table."
+     ::= {emnemaLogEntry 2}
+
+ emnemaLogSource OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..15))
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The source for this log-entry (example DHCPv4)"
+     ::= {emnemaLogEntry 3}
+
+ emnemaLogChannel OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..15))
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The channel for this log-entry (examples stderr & stdout). For
+          simplicity these can be merged."
+     ::= {emnemaLogEntry 4}
+
+ emnemaLogData OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..255))
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The text in this log-entry. This may or may-not include new-line.
+          Long lines will always be split into multiple entries."
+     ::= {emnemaLogEntry 5}
+
+ emnemaConfigV0 OBJECT IDENTIFIER ::= {emnema 4}
+
+ emnemaConfigV0ModeIPv4 OBJECT-TYPE
+     SYNTAX      EmNeMaModeIPv4Mode
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "The mode of operation for IPv4."
+     ::= {emnemaConfigV0 1}
+
+ emnemaConfigV0StaticIPV4Address OBJECT-TYPE
+     SYNTAX      InetAddressIPv4
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Four entries with static IPv4 addresses. Empty-string denotes an invalid entry (not in use)."
+     ::= {emnemaConfigV0 2}
+
+ emnemaConfigV0StaticIPV4Netmask OBJECT-TYPE
+     SYNTAX      InetAddressPrefixLength
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Four entries with static IPv4 netmasks."
+     ::= {emnemaConfigV0 3}
+
+ emnemaConfigV0StaticIPV4DefaultGateway OBJECT-TYPE
+     SYNTAX      InetAddressIPv4
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Default gateway. Empty-string denotes an invalid entry (not in use)."
+     ::= {emnemaConfigV0 4}
+
+ emnemaConfigV0StaticIPv4DNSServer OBJECT-TYPE
+     SYNTAX      InetAddressIPv4
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Three entries with static IPv4 DNS servers. Empty-string denotes an invalid entry (not in use)."
+     ::= {emnemaConfigV0 5}
+
+ emnemaConfigV0StaticIPv4DNSSearch OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..63))
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Four entries with static IPv4 DNS searches."
+     ::= {emnemaConfigV0 6}
+
+ emnemaConfigV0ModeIPv6 OBJECT-TYPE
+     SYNTAX      EmNeMaModeIPv6Mode
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "The mode of operation for IPv6."
+     ::= {emnemaConfigV0 7}
+
+ emnemaConfigV0StaticIPV6Address OBJECT-TYPE
+     SYNTAX      InetAddressIPv6
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Four entries with static IPv6 addresses. Empty-string denotes an invalid entry (not in use)."
+     ::= {emnemaConfigV0 8}
+
+ emnemaConfigV0StaticIPV6Netmask OBJECT-TYPE
+     SYNTAX      InetAddressPrefixLength
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Four entries with static IPv6 netmasks."
+     ::= {emnemaConfigV0 9}
+
+ emnemaConfigV0StaticIPV6DefaultGateway OBJECT-TYPE
+     SYNTAX      InetAddressIPv6
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Default gateway. Empty-string denotes an invalid entry (not in use)."
+     ::= {emnemaConfigV0 10}
+
+ emnemaConfigV0StaticIPv6DNSServer OBJECT-TYPE
+     SYNTAX      InetAddressIPv6
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Three entries with static IPv4 DNS servers. Empty-string denotes an invalid entry (not in use)."
+     ::= {emnemaConfigV0 11}
+
+ emnemaConfigV0StaticIPv6DNSSearch OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (0..63))
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Four entries with static IPv4 DNS searches."
+     ::= {emnemaConfigV0 12}
+
+ emnemaStatusResolvConf OBJECT-TYPE
+     SYNTAX      DisplayStringLong (SIZE (0..1400))
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The current /etc/resolv.conf file. This string will contain unix style new-lines (\n)"
+     ::= {emnema 5}
+
+emnemaID OBJECT-TYPE
+     SYNTAX      EmnemaIDString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Binary ID. This is the ID used internally in the proprietary discovery protocol."
+     ::= {emnema 6}
+
+logoBrightness OBJECT-TYPE
+     SYNTAX      Integer32(0..100)
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "If illuminated logo is present on the unit, this cell will be
+          visible. It allows the brightness of the LED to be in percent."
+     ::= {logo 1}
+
+logoFindMe OBJECT-TYPE
+     SYNTAX      Integer32(0..86400)
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "If illuminated logo is present on the unit, this cell will be
+          visible. This value can be set to a value bigger than zero, to
+          specify the number of seconds the LED will blink to make it easier
+          to identify the device. To cancel this function, set this cell to
+          the value of 0."
+     ::= {logo 2}
+
+aaMadiTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF AAMadiEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry, defining a table
+     STATUS      current
+     DESCRIPTION
+         "A list of aaMadi cards (Analog Audio <-> MADI)."
+     ::= {aaMadi 1}
+
+ aaMadiEntry OBJECT-TYPE
+     SYNTAX      AAMadiEntry
+     MAX-ACCESS  not-accessible -- This is a dummy entry defining the row-type found in the type
+     STATUS      current
+     DESCRIPTION
+         "An entry containing a single aaMadi card."
+     INDEX {aaMadiIndex}
+     ::= {aaMadiTable 1}
+
+  AAMadiEntry ::= SEQUENCE {
+     aaMadiIndex               Integer32,
+     aaMadiAPIVersion          Integer32,
+     aaMadiFirmwareVersion     DisplayString,
+     aaMadiState               Integer32,
+     aaMadiStateHelp           DisplayString,
+     aaMadiPorts               DisplayString,
+     aaMadiClockRange          AAMadiClockRangeType,
+     aaMadiClockSource         AAMadiClockSourceType,
+     aaMadiInputLocked         TruthValue,
+     aaMadiInputChannels       AAMadiChannelsCountType,
+     aaMadiInputRate           AAMadiRateType,
+     aaMadiInputSynced         TruthValue,
+     aaMadiAnalogInputLevel    Integer32,
+     aaMadiAnalogOutputLevel   Integer32,
+     aaMadiOutputRate          AAMadiRateType,
+     aaMadiOutputChannels      AAMadiChannelsCountType,
+     aaMadiOutputMatrix        DisplayString
+ }
+
+  aaMadiIndex OBJECT-TYPE
+     SYNTAX      Integer32(0..65535)
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+         "The internal index for the aaMadiTable. Indentifies the card"
+     ::= {aaMadiEntry 1}
+
+  aaMadiAPIVersion OBJECT-TYPE
+     SYNTAX      Integer32
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The API version used."
+     ::= {aaMadiEntry 2}
+
+  aaMadiFirmwareVersion OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The current version of the firmware running on the card."
+     ::= {aaMadiEntry 3}
+
+  aaMadiState OBJECT-TYPE
+     SYNTAX      Integer32
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "The current state of the card (Used during initialization, flashing etc.)"
+     ::= {aaMadiEntry 4}
+
+  aaMadiStateHelp OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "Description of the current state of the card. Might also include extra information about the progress."
+     ::= {aaMadiEntry 5}
+
+  aaMadiPorts OBJECT-TYPE
+     SYNTAX      DisplayString
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "A semicolon seperated list of which Input/Output ports are used to/from the main matrix. These should match matrixInputPortIndex and matrixOutputPortIndex."
+     ::= {aaMadiEntry 6}
+
+  aaMadiClockRange OBJECT-TYPE
+     SYNTAX      AAMadiClockRangeType
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Which clock-range mode should the card operate in."
+     ::= {aaMadiEntry 7}
+
+  aaMadiClockSource OBJECT-TYPE
+     SYNTAX      AAMadiClockSourceType
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "Which clock-source should be the master clock for the card."
+     ::= {aaMadiEntry 8}
+
+  aaMadiInputLocked OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "This is a 4-entry array, telling if each MADI input is locked or not to a valid signal."
+     ::= {aaMadiEntry 9}
+
+  aaMadiInputChannels OBJECT-TYPE
+     SYNTAX      AAMadiChannelsCountType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "This is a 4-entry array, telling how many channels is detected withing each MADI stream. It can currently detect 56 or 64 channels. Only valid if stream is locked."
+     ::= {aaMadiEntry 10}
+
+ aaMadiInputRate OBJECT-TYPE
+     SYNTAX      AAMadiRateType
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "This is a 4-entry array, telling what rate each MADI input has detected. It can currently be either 48 or 96 KHz. Only valid if stream is locked."
+     ::= {aaMadiEntry 11}
+
+  aaMadiInputSynced OBJECT-TYPE
+     SYNTAX      TruthValue
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "This is a 4-entry array, telling if each MADI input is synced to the given clock-domain."
+     ::= {aaMadiEntry 12}
+
+  aaMadiAnalogInputLevel OBJECT-TYPE
+     SYNTAX      Integer32
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "This is a 8-entry array, given the current dBFS value for each analog input. It is currently within the range of -120 and 0 dBFS."
+     ::= {aaMadiEntry 13}
+
+  aaMadiAnalogOutputLevel OBJECT-TYPE
+     SYNTAX      Integer32
+     MAX-ACCESS  read-only
+     STATUS      current
+     DESCRIPTION
+         "This is a 8-entry array, given the current dBFS value for each analog output. It is currently within the range of -120 and 0 dBFS."
+     ::= {aaMadiEntry 14}
+
+  aaMadiOutputRate OBJECT-TYPE
+     SYNTAX      AAMadiRateType
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "This is a 4-entry array, configuring the current clock-speed for the output stream. Use in combination with clock-range."
+     ::= {aaMadiEntry 15}
+
+  aaMadiOutputChannels OBJECT-TYPE
+     SYNTAX      AAMadiChannelsCountType
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "This is a 4-entry array, configuring the current channel-count output stream."
+     ::= {aaMadiEntry 16}
+
+  aaMadiOutputMatrix OBJECT-TYPE
+     SYNTAX      DisplayString (SIZE (3..16))
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+         "This is a 2-dimensional-array, configuring the audio matrix per output
+          channel. First index selects stream, second index selects the channel.
+          The string contains two numbers split with a semicolon. First number
+          says the source block, while the second number says the source channel
+          within that block."
+     ::= {aaMadiEntry 17}
+
+barnfindMatrixGroup OBJECT-GROUP
+  OBJECTS { matrixInputPortName,
+            matrixInputPortNameUser,
+            matrixInputPortLogoUser,
+            matrixInputPortExtEqualizerType,
+            matrixInputPortExtEqualizerParameters,
+            matrixInputPortExtEqualizerSignalDetected,
+            matrixInputPortExtReclockerType,
+            matrixInputPortExtReclockerParameters,
+            matrixInputPortExtReclockerLock,
+            matrixInputPortExtReclockerSignalDetected,
+            matrixInputPortIntEqualizerType,
+            matrixInputPortIntEqualizerParameters,
+            matrixInputPortIntEqualizerSignalDetected,
+            matrixInputPortIntReclockerType,
+            matrixInputPortIntReclockerParameters,
+            matrixInputPortIntReclockerLock,
+            matrixInputPortIntReclockerSignalDetected,
+            matrixInputPortAnalyzerType,
+            matrixInputPortAnalyzerParameters,
+            matrixInputPortAnalyzerSignalDetected,
+            matrixOutputPortName,
+            matrixOutputPortNameUser,
+            matrixOutputPortLogoUser,
+            matrixOutputPortInputPort,
+            matrixOutputPortIntReclockerType,
+            matrixOutputPortIntReclockerParameters,
+            matrixOutputPortIntReclockerLock,
+            matrixOutputPortIntReclockerSignalDetected,
+            matrixOutputPortIntCableDriverType,
+            matrixOutputPortIntCableDriverParameters,
+            matrixOutputPortIntCableDriverSignalDetected,
+            matrixOutputPortExtReclockerType,
+            matrixOutputPortExtReclockerParameters,
+            matrixOutputPortExtReclockerLock,
+            matrixOutputPortExtReclockerSignalDetected,
+            matrixOutputPortExtCableDriverType,
+            matrixOutputPortExtCableDriverParameters,
+            matrixOutputPortExtCableDriverSignalDetected,
+            matrixOutputPortSyncSource,
+            matrixOutputPortAutoChangeOverType,
+            matrixOutputPortAutoChangeOverParameters
+  }
+  STATUS  current
+  DESCRIPTION
+          "The collection of objects that the matrix table consists of."
+  ::= { barnfindGroups 1 }
+
+barnfindHardwareLookupGroup OBJECT-GROUP
+  OBJECTS { hardwareTypeName, hardwareTypeParameterName, hardwareTypeParameterSyntax
+  }
+  STATUS  current
+  DESCRIPTION
+          "The collection of objects that the hardware lookup table consists of."
+  ::= { barnfindGroups 2 }
+
+sfpGroup OBJECT-GROUP
+  OBJECTS { sfpSmartInfoValue,
+            sfpSmartInfoValueSyntax,
+            sfpSmartInfoName,
+            sfpSmartInfoRowStatus,
+            sfpCommonInfoBitRate,
+            sfpCommonInfoWaveLengthNm,
+            sfpCommonInfoRevision,
+            sfpCommonInfoProductionLot,
+            sfpCommonInfoProductionDate,
+            sfpCommonInfoSerialNumber,
+            sfpCommonInfoPartNumber,
+            sfpCommonInfoVendorName,
+            sfpCommonInfoLengths,
+            sfpCommonInfoConnector,
+            sfpCommonInfoPresent,
+            sfpCommonInfoPortName
+  }
+  STATUS  current
+  DESCRIPTION
+          "The collection of objects that the sfpCommonInfo and sfpSmartInfo tables consists of."
+  ::= { barnfindGroups 3 }
+
+firmwareUpgradeGroup OBJECT-GROUP
+  OBJECTS { firmwareUpgradeState,
+            firmwareUpgradeTriggerCheck,
+            firmwareUpgradeTriggerUpgrade,
+            firmwareUpgradeLastLogLine,
+            firmwareUpgradeLastLogRowStatus,
+            firmwareSerialNumber,
+            firmwareModel
+  }
+  STATUS  current
+  DESCRIPTION
+          "The collection of objects that the firmwareUpgrade consists of."
+  ::= { barnfindGroups 4}
+
+diagnosticsGroup OBJECT-GROUP
+  OBJECTS { diagnosticsName,
+            diagnosticsSyntax,
+            diagnosticsValue,
+            diagnosticsSendToLED
+  }
+  STATUS  current
+  DESCRIPTION
+         "The collection of objects that the diagnostics consists of."
+  ::= { barnfindGroups 5}
+
+trapsGroup OBJECT-GROUP
+  OBJECTS { trapsTargetRowStatus,
+            trapsTargetType,
+            trapsTargetHost,
+            trapsTargetPort,
+            trapsTargetStatus,
+            trapsTargetConfig,
+            trapsTargetSFPDiag,
+            trapsTargetEmnema,
+            trapsTargetHostType
+ }
+  STATUS  current
+  DESCRIPTION
+         "The collection of objects that the traps consists of."
+  ::= { barnfindGroups 6}
+
+ emnemaGroup OBJECT-GROUP
+   OBJECTS {
+            emnemaStatusResolvConf,
+            emnemaConfigV0StaticIPv6DNSSearch,
+            emnemaConfigV0StaticIPv6DNSServer,
+            emnemaConfigV0StaticIPV6DefaultGateway,
+            emnemaConfigV0StaticIPV6Netmask,
+            emnemaConfigV0StaticIPV6Address,
+            emnemaConfigV0ModeIPv6,
+            emnemaConfigV0StaticIPv4DNSSearch,
+            emnemaConfigV0StaticIPv4DNSServer,
+            emnemaConfigV0StaticIPV4DefaultGateway,
+            emnemaConfigV0StaticIPV4Netmask,
+            emnemaConfigV0StaticIPV4Address,
+            emnemaConfigV0ModeIPv4,
+            emnemaLogData,
+            emnemaLogChannel,
+            emnemaLogSource,
+            emnemaLogRowStatus,
+            emnemaStatusRoutePriority,
+            emnemaStatusRouteGateway,
+            emnemaStatusRouteDestinationNetmask,
+            emnemaStatusRouteDestinationAddress,
+            emnemaStatusRouteSourceNetmask,
+            emnemaStatusRouteSourceAddress,
+            emnemaStatusRouteAddressType,
+            emnemaStatusRouteDevice,
+            emnemaStatusRouteRowStatus,
+            emnemaStatusIPDevice,
+            emnemaStatusIPNetmask,
+            emnemaStatusIPAddress,
+            emnemaStatusIPAddressType,
+            emnemaStatusIPRowStatus,
+            emnemaID
+  }
+  STATUS  current
+  DESCRIPTION
+         "The collection of objects that emnema consists of."
+  ::= { barnfindGroups 7}
+
+traps2Group NOTIFICATION-GROUP
+  NOTIFICATIONS { statusTrap,
+                  configTrap,
+                  sfpDiagTrap,
+                  emnemaTrap
+ }
+  STATUS  current
+  DESCRIPTION
+         "The collection of notifcations that the traps consists of."
+  ::= { barnfindGroups 8}
+
+logoGroup OBJECT-GROUP
+  OBJECTS {
+           logoBrightness,
+           logoFindMe
+  }
+  STATUS current
+  DESCRIPTION
+         "The collection of objects that logo consists of."
+  ::= { barnfindGroups 9}
+
+aaMadiGroup OBJECT-GROUP
+  OBJECTS { aaMadiAPIVersion,
+            aaMadiFirmwareVersion,
+            aaMadiState,
+            aaMadiStateHelp,
+            aaMadiPorts,
+            aaMadiClockRange,
+            aaMadiClockSource,
+            aaMadiInputLocked,
+            aaMadiInputChannels,
+            aaMadiInputRate,
+            aaMadiInputSynced,
+            aaMadiAnalogInputLevel,
+            aaMadiAnalogOutputLevel,
+            aaMadiOutputRate,
+            aaMadiOutputChannels,
+            aaMadiOutputMatrix
+  }
+  STATUS  current
+  DESCRIPTION
+          "The collection of objects that the AA-MADI table consists of."
+  ::= { barnfindGroups 10 }
+
+barnfindBarnOneCompliance MODULE-COMPLIANCE
+  STATUS  current
+  DESCRIPTION
+          "The level of compliance that the BarnOne product-line will follow."
+  MODULE
+      MANDATORY-GROUPS { barnfindMatrixGroup,
+                         barnfindHardwareLookupGroup,
+                         sfpGroup,
+                         firmwareUpgradeGroup,
+                         diagnosticsGroup,
+                         trapsGroup, traps2Group,
+                         emnemaGroup,
+                         logoGroup,
+                         aaMadiGroup
+      }
+  ::= { barnfindCompliances 1}
+
+END

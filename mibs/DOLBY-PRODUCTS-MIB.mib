@@ -1,0 +1,176 @@
+DOLBY-PRODUCTS-MIB
+
+DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY,OBJECT-IDENTITY
+
+		FROM SNMPv2-SMI
+
+	dolbyProducts,dolbyModules
+
+		FROM DOLBY-SMI;
+
+
+dolbyProductsModule	MODULE-IDENTITY
+
+	LAST-UPDATED	"201609060000Z"
+
+	ORGANIZATION	"Dolby Laboratories Inc."
+
+	CONTACT-INFO	"Steve Oddo
+			 email: sjo@dolby.com"
+
+	DESCRIPTION	"The Dolby Laboratories product lines module
+			 Copyright 2007 Dolby Laboratories Inc"
+
+	REVISION	"201609060000Z"
+	DESCRIPTION	"Added Dolby Multichannel Amplifier Products"
+
+	REVISION	"201605160000Z"
+	DESCRIPTION	"Added Dolby Broadcast Professional Products"
+
+	REVISION	"201304010000Z"
+	DESCRIPTION	"Added Dolby Voice products"
+
+	REVISION	"201004200000Z"
+	DESCRIPTION	"Added generic Cinema Components - preliminary"
+
+	REVISION	"200701301858Z"
+	DESCRIPTION	"Initial draft"
+
+	::= { dolbyModules 3 }
+
+
+--
+-- Top-level tree for Dolby product-specific characteristics
+--
+
+
+--
+-- Product divisions
+--
+
+dolbyProProducts      OBJECT IDENTIFIER ::= { dolbyProducts 1 }
+dolbyConsumerProducts OBJECT IDENTIFIER ::= { dolbyProducts 2 }
+dolbyVoiceProducts    OBJECT IDENTIFIER ::= { dolbyProducts 3 }
+
+--
+-- Other product divisions ...
+--
+
+
+--
+-- Product families
+--
+
+proCinemaProducts    OBJECT IDENTIFIER ::= { dolbyProProducts 1 }
+proBroadcastProducts OBJECT IDENTIFIER ::= { dolbyProProducts 2 }
+
+
+--
+-- Other product families ...
+--
+
+
+--
+-- Individual products
+--
+
+--
+-- Cinema product lines
+--
+
+cinemaProcessors	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Cinema processor objects and events"
+	::= { proCinemaProducts 1 }
+
+
+cinemaAdapters	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Cinema audio adapter objects and events"
+	::= { proCinemaProducts 2 }
+
+
+cinemaServers	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Server product objects and events"
+	::= { proCinemaProducts 3 }
+
+
+cinemaDecoders	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Decoder product objects and events"
+	::= { proCinemaProducts 4 }
+
+cinemaAutomation	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Automation product objects and events"
+	::= { proCinemaProducts 5 }
+
+cinemaComponents	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Component objects and events"
+	::= { proCinemaProducts 6 }
+
+cinemaAmplifiers	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Amplifier product objects and events"
+	::= { proCinemaProducts 7 }
+
+
+--
+-- Other products ...
+--
+
+
+--
+-- Broadcast Professional Products lines
+--
+
+broadcastAudioDecoders OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION "Dolby Broadcast Professional Audio Decoders"
+	::= { proBroadcastProducts 1 }
+
+broadcastObjectAuthoring OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION "Dolby Broadcast Professional Object Authoring"
+	::= { proBroadcastProducts 2 }
+
+broadcastAudioEncoders OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION "Dolby Broadcast Professional Audio Encoders"
+	::= { proBroadcastProducts 3 }
+
+
+--
+-- Other product lines ...
+--
+
+--
+-- Voice product lines
+--
+voiceServiceProviderProducts	OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Dolby Voice Service Provider Product objects and event."
+	::= { dolbyVoiceProducts 1 }
+
+voiceEnterpriseProducts		OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Dolby Voice Enterprise Product objects and event."
+	::= { dolbyVoiceProducts 2 }
+
+voiceConsumerProducts		OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Dolby Voice Consumer Product objects and event."
+	::= { dolbyVoiceProducts 3 }
+
+voiceMobileProducts		OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION	"Dolby Voice Mobile Product objects and event."
+	::= { dolbyVoiceProducts 4 }
+
+END
+

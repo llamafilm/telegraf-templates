@@ -1,0 +1,1105 @@
+CDS-PJTR-CP4415RGB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    cdEsProjector
+        FROM CDS-SMI
+    Integer32, MODULE-IDENTITY, OBJECT-TYPE
+        FROM SNMPv2-SMI
+    DisplayString, TEXTUAL-CONVENTION, TruthValue
+        FROM SNMPv2-TC
+    ;
+
+cp4415Rgb MODULE-IDENTITY
+    LAST-UPDATED  "202207150916Z" -- July 15, 2022
+    ORGANIZATION
+        "Christie Digital Systems, Inc."
+    CONTACT-INFO
+        "Christie Digital Systems
+         Customer Service
+
+         Postal:     10550 Camden Drive
+         Cypress, Ca 90630
+         USA
+
+         Tel:        +1 800 221-8025
+
+         E-mail:     support@christiedigital.com"
+    DESCRIPTION
+        "The MIB module for CDS Entertainment Solutions 4415RGB Cinema
+         projector.
+         iso(1).org(3).dod(6).internet(1).private(4).enterprises(1)
+         .christiedigital(25766)
+         .christieDigitalProduct(1)
+         .cdEs(12).cdEsProjector(1)"
+    REVISION      "202207150916Z" -- July 15, 2022
+    DESCRIPTION
+        "Original release."
+
+    ::= { cdEsProjector 157}
+
+-- ====================================================================
+--
+-- SerialNumber - a table of serial numbers of install sw/hw components
+
+Cdcp4415RgbSerialNumberTblIdx ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT    "d"
+    STATUS        current
+    DESCRIPTION
+        "A value used to index projector serial numbers."
+    SYNTAX        Integer32 (1..64)
+
+-- ====================================================================
+--
+-- Versions - a table of versions of install sw/hw components
+
+Cdcp4415RgbVersionsTblIdx ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT    "d"
+    STATUS        current
+    DESCRIPTION
+        "A value used to index projector versions."
+    SYNTAX        Integer32 (1..64)
+
+-- ====================================================================
+--
+-- GPIOs - a table of GPI and GPO ports
+
+Cdcp4415RgbGpioPortTblIdx ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT    "d"
+    STATUS        current
+    DESCRIPTION
+        "A value used to index GPIO ports."
+    SYNTAX        Integer32 (1..4)
+
+-- ====================================================================
+
+cdcp4415RgbConfig OBJECT IDENTIFIER ::= { cp4415Rgb 1 }
+
+cdcp4415RgbVersionsTable OBJECT-TYPE
+    SYNTAX        SEQUENCE OF Cdcp4415RgbVersionsEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "A table listing the versions of the projectors hardware and
+         software components."
+    ::= { cdcp4415RgbConfig 1 }
+
+cdcp4415RgbVersionsEntry OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbVersionsEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "The entry contains a version number and its description."
+    INDEX
+        { cdcp4415RgbVersionsTblIdx }
+    ::= { cdcp4415RgbVersionsTable 1 }
+
+Cdcp4415RgbVersionsEntry ::= SEQUENCE
+{
+    cdcp4415RgbVersionsTblIdx      Cdcp4415RgbVersionsTblIdx,
+    cdcp4415RgbVersionsDescription DisplayString,
+    cdcp4415RgbVersionsVersion     DisplayString
+}
+
+cdcp4415RgbVersionsTblIdx OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbVersionsTblIdx
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Projector Configuration index to which the parameters in this
+         row apply."
+    ::= { cdcp4415RgbVersionsEntry 1 }
+
+cdcp4415RgbVersionsDescription OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Component which this version entry maps to."
+    ::= { cdcp4415RgbVersionsEntry 2 }
+
+cdcp4415RgbVersionsVersion OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The version or serial number of the component this row
+         represents.
+         ."
+    ::= { cdcp4415RgbVersionsEntry 3 }
+
+cdcp4415RgbSerialNumberTable OBJECT-TYPE
+    SYNTAX        SEQUENCE OF Cdcp4415RgbSerialNumberEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "A table listing the serial numbers of the projectors hardware
+         and software components."
+    ::= { cdcp4415RgbConfig 2 }
+
+cdcp4415RgbSerialNumberEntry OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbSerialNumberEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "The entry contains a serial number and its description."
+    INDEX
+        { cdcp4415RgbSerialNumberTblIdx }
+    ::= { cdcp4415RgbSerialNumberTable 1 }
+
+Cdcp4415RgbSerialNumberEntry ::= SEQUENCE
+{
+    cdcp4415RgbSerialNumberTblIdx      Cdcp4415RgbSerialNumberTblIdx,
+    cdcp4415RgbSerialNumberDescription DisplayString,
+    cdcp4415RgbSerialNumberValue       DisplayString
+}
+
+cdcp4415RgbSerialNumberTblIdx OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbSerialNumberTblIdx
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Projector Configuration index to which the parameters in this
+         row apply."
+    ::= { cdcp4415RgbSerialNumberEntry 1 }
+
+cdcp4415RgbSerialNumberDescription OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Component which this serial number entry maps to."
+    ::= { cdcp4415RgbSerialNumberEntry 2 }
+
+cdcp4415RgbSerialNumberValue OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The serial number of the component this row represents. ."
+    ::= { cdcp4415RgbSerialNumberEntry 3 }
+
+cdcp4415RgbDmdType OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the DMD Type."
+    ::= { cdcp4415RgbConfig 3 }
+
+cdcp4415RgbSatelliteType OBJECT IDENTIFIER ::= { cdcp4415RgbConfig 4 }
+
+cdcp4415RgbRedSatelliteType OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the Red Satellite type."
+    ::= { cdcp4415RgbSatelliteType 1 }
+
+cdcp4415RgbGreenSatelliteType OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the Green Satellite type."
+    ::= { cdcp4415RgbSatelliteType 2 }
+
+cdcp4415RgbBlueSatelliteType OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the Blue Satellite type."
+    ::= { cdcp4415RgbSatelliteType 3 }
+
+cdcp4415RgbPeripherals OBJECT IDENTIFIER ::= { cdcp4415RgbConfig 5 }
+
+cdcp4415RgbIlsInstalled OBJECT-TYPE
+    SYNTAX        TruthValue
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns true if ILS is installed otherwise returns false."
+    ::= { cdcp4415RgbPeripherals 1 }
+
+cdcp4415RgbStatus OBJECT IDENTIFIER ::= { cp4415Rgb 2 }
+
+-- ====================================================================
+--
+-- Security status group
+
+cdcp4415RgbSMSecurityStatus OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 1 }
+
+cdcp4415RgbSMSecureConnection OBJECT-TYPE
+    SYNTAX  TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM Secure Connection"
+    ::= { cdcp4415RgbSMSecurityStatus 1 }
+
+cdcp4415RgbSMStatusConnection OBJECT-TYPE
+    SYNTAX  TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM Status Connection"
+    ::= { cdcp4415RgbSMSecurityStatus 2 }
+
+cdcp4415RgbSMCryptoState OBJECT-TYPE
+    SYNTAX  INTEGER {
+        no(1),
+        yes(2)
+    }
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM Crypt State OK"
+    ::= { cdcp4415RgbSMSecurityStatus 3 }
+
+cdcp4415RgbSMTamper OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM Tamper"
+    ::= { cdcp4415RgbSMSecurityStatus 4 }
+
+cdcp4415RgbSMMarriage OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM Marriage"
+    ::= { cdcp4415RgbSMSecurityStatus 5 }
+
+cdcp4415RgbSMImageIntegrity OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM Image Integrity"
+    ::= { cdcp4415RgbSMSecurityStatus 6 }
+
+cdcp4415RgbSMAlgoIntegrity OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM Algorithm Integrity"
+    ::= { cdcp4415RgbSMSecurityStatus 7 }
+
+cdcp4415RgbSMZeroization OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM zeroization"
+    ::= { cdcp4415RgbSMSecurityStatus 8 }
+
+cdcp4415RgbSMLogSpaceWarning OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SMLog Space Warning"
+    ::= { cdcp4415RgbSMSecurityStatus 9 }
+
+cdcp4415RgbSMTamperEnclosurePhysical OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Security Enclosure Tamper (Physical)"
+    ::= { cdcp4415RgbSMSecurityStatus 10 }
+
+cdcp4415RgbSMTamperMarriageRing OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Marriage Ring Tamper."
+    ::= { cdcp4415RgbSMSecurityStatus 11 }
+
+cdcp4415RgbSMTamperServiceDoor OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Service Door Tamper."
+    ::= { cdcp4415RgbSMSecurityStatus 12 }
+
+cdcp4415RgbSMBatteryEvent OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Battery event"
+    ::= { cdcp4415RgbSMSecurityStatus 13 }
+
+cdcp4415RgbSMBatteryLow OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Battery state."
+    ::= { cdcp4415RgbSMSecurityStatus 14 }
+
+cdcp4415RgbSMSecurityLog OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "SM security log status."
+    ::= { cdcp4415RgbSMSecurityStatus 15 }
+
+cdcp4415RgbSelectedImbType OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..255))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Selected IMB Type"
+    ::= { cdcp4415RgbSMSecurityStatus 16 }
+
+-- ====================================================================
+--
+-- Sensor tables
+
+cdcp4415RgbSensors OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 2 }
+
+cdcp4415RgbTempSensorsTable OBJECT-TYPE
+    SYNTAX        SEQUENCE OF Cdcp4415RgbTempSensorsEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Table of temperature sensors and their values."
+    ::= { cdcp4415RgbSensors 1 }
+
+cdcp4415RgbTempSensorsEntry OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbTempSensorsEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "An entry contains a temperature sensor and its statistics."
+    INDEX
+        { cdcp4415RgbTempSensorsTblIdx }
+    ::= { cdcp4415RgbTempSensorsTable 1 }
+
+Cdcp4415RgbTempSensorsEntry ::= SEQUENCE
+{
+    cdcp4415RgbTempSensorsTblIdx       Integer32,
+    cdcp4415RgbTempSensorsDevice       DisplayString,
+    cdcp4415RgbTempSensorsValue        DisplayString,
+    cdcp4415RgbTempSensorsCriticalLow  Integer32,
+    cdcp4415RgbTempSensorsWarningLow   Integer32,
+    cdcp4415RgbTempSensorsWarningHigh  Integer32,
+    cdcp4415RgbTempSensorsCriticalHigh Integer32
+}
+
+cdcp4415RgbTempSensorsTblIdx OBJECT-TYPE
+    SYNTAX        Integer32 (1..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Reference index for each sensor."
+    ::= { cdcp4415RgbTempSensorsEntry 1 }
+
+cdcp4415RgbTempSensorsDevice OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The name of the temperature sensor we are reading."
+    ::= { cdcp4415RgbTempSensorsEntry 2 }
+
+cdcp4415RgbTempSensorsValue OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..16))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Temperature sensor read value, a string contains float number."
+    ::= { cdcp4415RgbTempSensorsEntry 3 }
+
+cdcp4415RgbTempSensorsCriticalLow OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The temperature sensor critical lower limit."
+    ::= { cdcp4415RgbTempSensorsEntry 4 }
+
+cdcp4415RgbTempSensorsWarningLow OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The temperature sensor warning lower limit."
+    ::= { cdcp4415RgbTempSensorsEntry 5 }
+
+cdcp4415RgbTempSensorsWarningHigh OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The temperature sensor warning upper limit."
+    ::= { cdcp4415RgbTempSensorsEntry 6 }
+
+cdcp4415RgbTempSensorsCriticalHigh OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The temperature sensor critical upper limit."
+    ::= { cdcp4415RgbTempSensorsEntry 7 }
+
+cdcp4415RgbFanSensorsTable OBJECT-TYPE
+    SYNTAX        SEQUENCE OF Cdcp4415RgbFanSensorsEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Table of fan sensors and their values."
+    ::= { cdcp4415RgbSensors 2 }
+
+cdcp4415RgbFanSensorsEntry OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbFanSensorsEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "An entry contains fan sensors and its statistics."
+    INDEX
+        { cdcp4415RgbFanSensorsTblIdx }
+    ::= { cdcp4415RgbFanSensorsTable 1 }
+
+Cdcp4415RgbFanSensorsEntry ::= SEQUENCE
+{
+    cdcp4415RgbFanSensorsTblIdx       Integer32,
+    cdcp4415RgbFanSensorsDevice       DisplayString,
+    cdcp4415RgbFanSensorsValue        DisplayString,
+    cdcp4415RgbFanSensorsCriticalLow  Integer32,
+    cdcp4415RgbFanSensorsWarningLow   Integer32,
+    cdcp4415RgbFanSensorsWarningHigh  Integer32,
+    cdcp4415RgbFanSensorsCriticalHigh Integer32
+}
+
+cdcp4415RgbFanSensorsTblIdx OBJECT-TYPE
+    SYNTAX        Integer32 (1..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Reference index for fan sensor table."
+    ::= { cdcp4415RgbFanSensorsEntry 1 }
+
+cdcp4415RgbFanSensorsDevice OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The name of the fan sensor we are reading."
+    ::= { cdcp4415RgbFanSensorsEntry 2 }
+
+cdcp4415RgbFanSensorsValue OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..16))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The read value of the fan speed, a string conrains int number."
+    ::= { cdcp4415RgbFanSensorsEntry 3 }
+
+cdcp4415RgbFanSensorsCriticalLow OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The fan sensor critical lower limit."
+    ::= { cdcp4415RgbFanSensorsEntry 4 }
+
+cdcp4415RgbFanSensorsWarningLow OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The fan sensor warning lower limit."
+    ::= { cdcp4415RgbFanSensorsEntry 5 }
+
+cdcp4415RgbFanSensorsWarningHigh OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The fan sensor warning upper limit."
+    ::= { cdcp4415RgbFanSensorsEntry 6 }
+
+cdcp4415RgbFanSensorsCriticalHigh OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "The fan sensor critical upper limit."
+    ::= { cdcp4415RgbFanSensorsEntry 7 }
+
+-- ====================================================================
+
+cdcp4415RgbInterlock OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 3 }
+
+cdcp4415RgbInterlockReason OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS	  read-only
+    STATUS	      current
+    DESCRIPTION
+	    "Reason of interlock tripped"
+    ::= { cdcp4415RgbInterlock 2 }
+
+
+-- ====================================================================
+
+cdcp4415RgbLens OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 4 }
+
+cdcp4415RgbIlsOnline OBJECT-TYPE
+    SYNTAX        TruthValue
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "ILS online"
+    ::= { cdcp4415RgbLens 1 }
+
+cdcp4415RgbLensType OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..63))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Lens Type"
+    ::= { cdcp4415RgbLens 2 }
+
+-- ====================================================================
+
+cdcp4415RgbSystemStatus OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 5 }
+
+cdcp4415RgbSystemUpgradeState OBJECT-TYPE
+    SYNTAX  INTEGER {
+        na(1),
+        pending(2),
+        upgrading(3),
+        finishedsuccess(4),
+        finishedfail(5)
+    }
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "System Upgrade State"
+    ::= { cdcp4415RgbSystemStatus 1 }
+
+cdcp4415RgbSystemTime OBJECT IDENTIFIER ::= { cdcp4415RgbSystemStatus 2 }
+
+cdcp4415RgbSystemDSTEnabled OBJECT-TYPE
+    SYNTAX  TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "True if System Timezone enabled"
+    ::= { cdcp4415RgbSystemTime 1 }
+
+cdcp4415RgbSystemTimezone OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "System Timezone"
+    ::= { cdcp4415RgbSystemTime 2 }
+
+cdcp4415RgbSystemTimeUTC OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "System Time in UTC"
+    ::= { cdcp4415RgbSystemTime 3 }
+
+cdcp4415RgbSMSystemTimeUTC OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "SM System Time in UTC"
+    ::= { cdcp4415RgbSystemTime 4 }
+
+cdcp4415RgbLocalTime OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "System Local Time"
+    ::= { cdcp4415RgbSystemTime 5 }
+
+cdcp4415RgbLocalTimeOffset OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "System Local Time Offset"
+    ::= { cdcp4415RgbSystemTime 6 }
+
+cdcp4415RgbDiskMemoryCPU OBJECT IDENTIFIER ::= { cdcp4415RgbSystemStatus 3 }
+
+cdcp4415RgbRootDiskSpaceTotalMBytes OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the root disk total space in MBytes."
+    ::= { cdcp4415RgbDiskMemoryCPU 1 }
+
+cdcp4415RgbRootDiskSpaceUsedMBytes OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the root disk used space in MBytes"
+    ::= { cdcp4415RgbDiskMemoryCPU 2 }
+
+cdcp4415RgbTotalMemoryMBytes OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the total memory space in MBytes"
+    ::= { cdcp4415RgbDiskMemoryCPU 3 }
+
+cdcp4415RgbFreeMemoryMBytes OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Returns the free memory space in MBytes"
+    ::= { cdcp4415RgbDiskMemoryCPU 4 }
+
+cdcp4415RgbCPULoadPercent OBJECT-TYPE
+    SYNTAX  Integer32 (0..100)
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+    "CPU Load Metric in percent"
+    ::= { cdcp4415RgbDiskMemoryCPU 5 }
+
+cdcp4415RgbCSenseOnline OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "CSense board online."
+    ::= { cdcp4415RgbSystemStatus 4 }
+
+cdcp4415RgbSystemDouserOpen OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "True if Douser is open"
+    ::= { cdcp4415RgbSystemStatus 5 }
+
+cdcp4415RgbSystemLightSourceOn OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "True if light source is on"
+    ::= { cdcp4415RgbSystemStatus 6 }
+
+cdcp4415RgbSystemPrefDiffuserInstalled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "True if diffuser is installed"
+    ::= { cdcp4415RgbSystemStatus 8 }
+
+-- ====================================================================
+
+cdcp4415RgbVideo OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 6 }
+
+cdcp4415RgbActiveChannelFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active Channel File"
+    ::= { cdcp4415RgbVideo 1 }
+
+cdcp4415RgbActiveDegammaFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active Degamma File"
+    ::= { cdcp4415RgbVideo 2 }
+
+cdcp4415RgbActiveMCGDLeftFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active MCGD Left File"
+    ::= { cdcp4415RgbVideo 3 }
+
+cdcp4415RgbActiveMCGDRightFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active MCGD Right File"
+    ::= { cdcp4415RgbVideo 4 }
+
+cdcp4415RgbActiveTCGDFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active TCGD File"
+    ::= { cdcp4415RgbVideo 5 }
+
+cdcp4415RgbActive3DFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active 3D File"
+    ::= { cdcp4415RgbVideo 6 }
+
+cdcp4415RgbActiveSourceFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active Source File"
+    ::= { cdcp4415RgbVideo 7 }
+
+cdcp4415RgbActiveScreenFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active Screen File"
+    ::= { cdcp4415RgbVideo 8 }
+
+
+cdcp4415RgbActiveIlsFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active ILS File"
+    ::= { cdcp4415RgbVideo 10 }
+
+cdcp4415RgbActiveUCFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active UC File"
+    ::= { cdcp4415RgbVideo 11 }
+
+cdcp4415RgbActiveCLUTFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active CLUT File"
+    ::= { cdcp4415RgbVideo 12 }
+
+cdcp4415RgbActiveCSCFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active CSC File"
+    ::= { cdcp4415RgbVideo 13 }
+
+cdcp4415RgbActiveEDIDFile OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "Active EDID File"
+    ::= { cdcp4415RgbVideo 14 }
+
+cdcp4415RgbDolbyEnabled OBJECT-TYPE
+    SYNTAX  TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Dolby 3D System Enabled"
+    ::= { cdcp4415RgbVideo 15 }
+
+cdcp4415RgbRealD3DEQEnabled OBJECT-TYPE
+    SYNTAX  TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "RealD 3D EQ Enabled"
+    ::= { cdcp4415RgbVideo 16 }
+
+cdcp4415RgbActiveWarpFile OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..255))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Name of the active warp file"
+    ::= { cdcp4415RgbVideo 17 }
+
+-- ====================================================================
+
+cdcp4415RgbPorts OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 9 }
+
+cdcp4415RgbGPIPortTable OBJECT-TYPE
+    SYNTAX        SEQUENCE OF Cdcp4415RgbGPIPortEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "A table listing the GPI port entries."
+    ::= { cdcp4415RgbPorts 1 }
+
+cdcp4415RgbGPIPortEntry OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbGPIPortEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "The GPI port status entry."
+    INDEX
+        { cdcp4415RgbGPIPortTblIdx }
+    ::= { cdcp4415RgbGPIPortTable 1 }
+
+Cdcp4415RgbGPIPortEntry ::= SEQUENCE
+{
+    cdcp4415RgbGPIPortTblIdx    Cdcp4415RgbGpioPortTblIdx,
+    cdcp4415RgbGPIPortStatus    DisplayString
+}
+
+cdcp4415RgbGPIPortTblIdx OBJECT-TYPE
+    SYNTAX        Cdcp4415RgbGpioPortTblIdx
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "GPI port index."
+    ::= { cdcp4415RgbGPIPortEntry 1 }
+
+cdcp4415RgbGPIPortStatus OBJECT-TYPE
+    SYNTAX        DisplayString (SIZE(0..255))
+    MAX-ACCESS    read-only
+    STATUS        current
+    DESCRIPTION
+        "GPI port status."
+    ::= { cdcp4415RgbGPIPortEntry 2 }
+
+-- ====================================================================
+
+cdcp4415RgbScheduler OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 10 }
+
+cdcp4415RgbSchedulerActive OBJECT-TYPE
+    SYNTAX  TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Schedule active, true or not."
+    ::= { cdcp4415RgbScheduler 1 }
+
+cdcp4415RgbSchedulerNextItemUUID OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "UUID of next item scheduled"
+    ::= { cdcp4415RgbScheduler 2 }
+
+cdcp4415RgbSchedulerNextTime OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Time of next item scheduled"
+    ::= { cdcp4415RgbScheduler 3 }
+
+-- ====================================================================
+
+cdcp4415RgbAutomation OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 11 }
+
+cdcp4415RgbAutomationEnabled OBJECT-TYPE
+    SYNTAX  TruthValue
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Automation enabled, true or not."
+    ::= { cdcp4415RgbAutomation 1 }
+
+cdcp4415RgbAutomationHealth OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Automation health description"
+    ::= { cdcp4415RgbAutomation 2 }
+
+cdcp4415RgbAutomationDeviceHealth OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Automation device health description"
+    ::= { cdcp4415RgbAutomation 3 }
+
+-- ====================================================================
+
+cdcp4415RgbLiteLoc OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 15 }
+
+cdcp4415RgbLiteLocStatus OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, Status"
+    ::= { cdcp4415RgbLiteLoc 1 }
+
+cdcp4415RgbLiteLocSensorToScreenCal OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..127))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, Sensor to Screen Calibration"
+    ::= { cdcp4415RgbLiteLoc 2 }
+
+cdcp4415RgbLiteLocLosToSensorCal OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, LOS to Sensor Calibration"
+    ::= { cdcp4415RgbLiteLoc 3 }
+
+
+cdcp4415RgbLiteLocAmbientTemp OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, Current ambient temperature"
+    ::= { cdcp4415RgbLiteLoc 4 }
+
+cdcp4415RgbLiteLocMaxExpectedAmbient OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, Maximum expected ambient temperature"
+    ::= { cdcp4415RgbLiteLoc 5 }
+
+cdcp4415RgbLiteLocDesiredBrightness  OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, Desired brightness percentage"
+    ::= { cdcp4415RgbLiteLoc 6 }
+
+cdcp4415RgbLiteLocActualBrightness OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, Actual brightness percentage"
+    ::= { cdcp4415RgbLiteLoc 7 }
+
+cdcp4415RgbLiteLocDesiredChromaticity OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "LiteLoc, Desired x,y chromaticity"
+    ::= { cdcp4415RgbLiteLoc 8 }
+
+cdcp4415RgbLiteLocColorSensorX OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..15))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "X color sensor values"
+    ::= { cdcp4415RgbLiteLoc 9 }
+
+cdcp4415RgbLiteLocColorSensorY OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..15))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Y color sensor values"
+    ::= { cdcp4415RgbLiteLoc 10 }
+
+cdcp4415RgbLiteLocColorSensorZ OBJECT-TYPE
+    SYNTAX  DisplayString (SIZE(0..15))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Z color sensor values"
+    ::= { cdcp4415RgbLiteLoc 11 }
+
+-- ====================================================================
+--
+-- Rental Mode Status Group
+cdcp4415RgbRentalModeStatus OBJECT IDENTIFIER ::= { cdcp4415RgbStatus 16 }
+
+cdcp4415RgbRentalModeState OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The rental mode service status"
+    ::= { cdcp4415RgbRentalModeStatus 1 }
+
+cdcp4415RgbRentalModeTamperingDetected OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "True if the rental mode service has detected tampering"
+    ::= { cdcp4415RgbRentalModeStatus 2 }
+
+cdcp4415RgbRentalModeTimeTamperingDetected OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "True if the rental mode service has detected tampering with time"
+    ::= { cdcp4415RgbRentalModeStatus 3 }
+
+cdcp4415RgbRentalModeIlluminationDuration OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Remaining illumination time with the current license"
+    ::= { cdcp4415RgbRentalModeStatus 4 }
+
+cdcp4415RgbRentalModeAlternativeInputsDuration OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Remaining alternative inputs duration with the current license"
+    ::= { cdcp4415RgbRentalModeStatus 5 }
+
+cdcp4415RgbRentalModeMaximumPower OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE(0..63))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Maximum power supported with the current license"
+    ::= { cdcp4415RgbRentalModeStatus 6 }
+
+-- This is a place holder for Actual on screen brightness
+--cdcp4415RgbLiteLoc OBJECT-TYPE
+--    SYNTAX  DisplayString (SIZE(0..15))
+--    MAX-ACCESS  read-only
+--    STATUS  current
+--    DESCRIPTION
+--        "LiteLoc, Actual on screen brightness (in foot-lamberts)"
+--    ::= { cdcp4415RgbLiteLoc 12 }
+
+END
+
+

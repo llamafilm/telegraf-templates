@@ -1,0 +1,100 @@
+--
+-- Sony AV Products SMI
+--
+--
+-- Copying all part of the contents of this file are prohibited by copyright laws.
+-- The company cannot accept liability for damage or loss resulting from the use
+-- of this  file, or for any claim from a third party.
+-- The contents and specifications may be subject to change without notice.
+--
+
+SONY-SMI DEFINITIONS ::= BEGIN
+
+IMPORTS
+	enterprises,
+	MODULE-IDENTITY,
+	OBJECT-IDENTITY
+		FROM SNMPv2-SMI;
+
+sony MODULE-IDENTITY
+	LAST-UPDATED "200307161444Z"
+	ORGANIZATION "Sony Corporation"
+	CONTACT-INFO
+		"eSP Department B&P Company
+		IT & Mobile Solutions Network Company
+		Sony Corporation"
+	DESCRIPTION
+		"This MIB is designed for use in managing Sony Professional Audio & Visual devices."
+	REVISION "200307161444Z"
+	DESCRIPTION
+		"compliance"
+	::= { enterprises 122 }
+
+
+-- assigned by IANA
+-- ;
+-- ;
+-- BSNC OBJECT-IDENTITY definition
+--
+
+professionalV1 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV1 is the main subtree for IMNC (v1)."
+	::= { sony 8501 }
+
+professionalV2 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV2 is the main subtree for IMNC (v2)."
+	::= { sony 8502 }
+
+professionalV3 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV3 is the main subtree for IMNC (v3)."
+	::= { sony 8503 }
+
+professionalV4 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV4 is the main subtree for IMNC (v4)."
+	::= { sony 8504 }
+
+professionalV5 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV5 is the main subtree for IMNC (v5)."
+	::= { sony 8505 }
+
+professionalV6 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV6 is the main subtree for IMNC (v6)."
+	::= { sony 8506 }
+
+professionalV7 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV7 is the main subtree for IMNC (v7)."
+	::= { sony 8507 }
+
+professionalV8 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV8 is the main subtree for IMNC (v8)."
+	::= { sony 8508 }
+
+professionalV9 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV9 is the main subtree for IMNC (v9)."
+	::= { sony 8509 }
+
+professionalV10 OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"professionalV10 is the main subtree for IMNC (v10)."
+	::= { sony 8510 }
+
+END

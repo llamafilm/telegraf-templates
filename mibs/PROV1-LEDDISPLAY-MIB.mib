@@ -1,0 +1,1225 @@
+--
+-- Sony Pro-AV MIB
+--
+-- Category Definitions and Category MIB
+--
+-- Sep 16, 2016 Release 1
+--
+--
+-- Copying all part of the contents of this file are prohibited by copyright laws.
+-- The company cannot accept liability for damage or loss resulting from the use
+-- of this  file, or for any claim from a third party.
+-- The contents and specifications may be subject to change without notice.
+--
+
+PROV1-LEDDISPLAY-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	OBJECT-GROUP,
+	MODULE-COMPLIANCE
+		FROM SNMPv2-CONF
+	MODULE-IDENTITY,
+	OBJECT-IDENTITY,
+	OBJECT-TYPE,
+	Integer32
+		FROM SNMPv2-SMI
+	proV1Category
+		FROM SONY-PRO-MIB
+	DisplayString
+		FROM SNMPv2-TC;
+
+proV1ledDisplay MODULE-IDENTITY
+	LAST-UPDATED "201609161056Z"
+	ORGANIZATION "Sony Corporation"
+	CONTACT-INFO
+		"Content Workflow Solutions Business Division
+		Professional Solutions Group
+		Sony Corporation"
+	DESCRIPTION
+		"This MIB is designed for use in managing Sony Professional Audio & Visual product."
+	REVISION "201609161056Z"
+	DESCRIPTION
+		"New Version"
+	::= { proV1Category 128 }
+
+proV1ledProduct OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"CLED info"
+	::= { proV1ledDisplay 1 }
+
+ledProductControllerTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedProductControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Controller Product Table"
+	::= { proV1ledProduct 1 }
+
+ledProductControllerEntry OBJECT-TYPE
+	SYNTAX LedProductControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledProductControllerIdx }
+	::= { ledProductControllerTable 1 }
+
+LedProductControllerEntry ::= SEQUENCE {
+	ledProductControllerIdx Integer32,
+	ledProductControllerModel DisplayString,
+	ledProductControllerDest DisplayString,
+	ledProductControllerSerial Integer32,
+	ledProductControllerVer DisplayString }
+
+ledProductControllerIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller entry index"
+	::= { ledProductControllerEntry 1 }
+
+ledProductControllerModel OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller model name"
+	::= { ledProductControllerEntry 2 }
+
+ledProductControllerDest OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller country code"
+	::= { ledProductControllerEntry 3 }
+
+ledProductControllerSerial OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller sirial number"
+	::= { ledProductControllerEntry 4 }
+
+ledProductControllerVer OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller module version"
+	::= { ledProductControllerEntry 5 }
+
+ledProductUnitTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedProductUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Unit Product Table"
+	::= { proV1ledProduct 2 }
+
+ledProductUnitEntry OBJECT-TYPE
+	SYNTAX LedProductUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledProductUnitIdx }
+	::= { ledProductUnitTable 1 }
+
+LedProductUnitEntry ::= SEQUENCE {
+	ledProductUnitIdx Integer32,
+	ledProductUnitPortId INTEGER,
+	ledProductUnitUnitId INTEGER,
+	ledProductUnitModel DisplayString,
+	ledProductUnitDest DisplayString,
+	ledProductUnitSerial Integer32,
+	ledProductUnitVer DisplayString }
+
+ledProductUnitIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"unit entry index"
+	::= { ledProductUnitEntry 1 }
+
+ledProductUnitPortId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Port Number"
+	::= { ledProductUnitEntry 2 }
+
+ledProductUnitUnitId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Unit Number"
+	::= { ledProductUnitEntry 3 }
+
+ledProductUnitModel OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"unit model name"
+	::= { ledProductUnitEntry 4 }
+
+ledProductUnitDest OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"unit country code"
+	::= { ledProductUnitEntry 5 }
+
+ledProductUnitSerial OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"unit sirial number"
+	::= { ledProductUnitEntry 6 }
+
+ledProductUnitVer OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"unit module version"
+	::= { ledProductUnitEntry 7 }
+
+proV1ledStatus OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"LED Status info"
+	::= { proV1ledDisplay 3 }
+
+ledStatusControllerTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedStatusControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Controller Status Table"
+	::= { proV1ledStatus 1 }
+
+ledStatusControllerEntry OBJECT-TYPE
+	SYNTAX LedStatusControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledStatusControllerIdx }
+	::= { ledStatusControllerTable 1 }
+
+LedStatusControllerEntry ::= SEQUENCE {
+	ledStatusControllerIdx Integer32,
+	ledStatusControllerPower INTEGER,
+	ledStatusControllerElapsedTime Integer32 }
+
+ledStatusControllerIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller entry index"
+	::= { ledStatusControllerEntry 1 }
+
+ledStatusControllerPower OBJECT-TYPE
+	SYNTAX INTEGER {
+		standby(0),
+		powerOn(2),
+		update(3),
+		forceStandby(4) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Power Status"
+	::= { ledStatusControllerEntry 2 }
+
+ledStatusControllerElapsedTime OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Elapsed Time"
+	::= { ledStatusControllerEntry 3 }
+
+ledStatusUnitTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedStatusUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Unit Status Table"
+	::= { proV1ledStatus 2 }
+
+ledStatusUnitEntry OBJECT-TYPE
+	SYNTAX LedStatusUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledStatusUnitIdx }
+	::= { ledStatusUnitTable 1 }
+
+LedStatusUnitEntry ::= SEQUENCE {
+	ledStatusUnitIdx Integer32,
+	ledStatusUnitPortId INTEGER,
+	ledStatusUnitUnitId INTEGER,
+	ledStatusUnitPower INTEGER,
+	ledStatusUnitLightingElapsedTime Integer32,
+	ledStatusUnitLightingElapsedDegradationAmount Integer32 }
+
+ledStatusUnitIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit entry index"
+	::= { ledStatusUnitEntry 1 }
+
+ledStatusUnitPortId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Port Number"
+	::= { ledStatusUnitEntry 2 }
+
+ledStatusUnitUnitId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Unit Number"
+	::= { ledStatusUnitEntry 3 }
+
+ledStatusUnitPower OBJECT-TYPE
+	SYNTAX INTEGER {
+		powerOff(0),
+		startingUp(1),
+		powerOn(2),
+		shuttingDown(3) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Power Status"
+	::= { ledStatusUnitEntry 4 }
+
+ledStatusUnitLightingElapsedTime OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Elapsed Time"
+	::= { ledStatusUnitEntry 5 }
+
+ledStatusUnitLightingElapsedDegradationAmount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Lighting Elapsed degration Amount"
+	::= { ledStatusUnitEntry 7 }
+
+ledStatusInput OBJECT-TYPE
+	SYNTAX INTEGER {
+		dvi(0),
+		dpSingle(1),
+		dbDual(2),
+		hdmi1(3),
+		hdmi2(4),
+		sdi(5),
+		dpSingle2(6) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Selcted Input Signal"
+	::= { proV1ledStatus 3 }
+
+proV1ledInput OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"Input Signal Info"
+	::= { proV1ledDisplay 5 }
+
+ledInputTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedInputEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Input Signal Table"
+	::= { proV1ledInput 1 }
+
+ledInputEntry OBJECT-TYPE
+	SYNTAX LedInputEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledInputIdx }
+	::= { ledInputTable 1 }
+
+LedInputEntry ::= SEQUENCE {
+	ledInputIdx Integer32,
+	ledInputDescription DisplayString,
+	ledInputConnector INTEGER,
+	ledInputSignal DisplayString,
+	ledInputFormat INTEGER,
+	ledInputDpDualHighFrameRateMode INTEGER,
+	ledInputPictureHPosition INTEGER,
+	ledInputPictureVPosition INTEGER,
+	ledInputStatusError INTEGER,
+	ledInput3Dmode INTEGER,
+	ledInput3DStatus INTEGER,
+	ledInput3DInputDelay INTEGER,
+	ledInput3DPhaseInversion INTEGER }
+
+ledInputIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"signal entry index"
+	::= { ledInputEntry 1 }
+
+ledInputDescription OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Input Signal Description"
+	::= { ledInputEntry 2 }
+
+ledInputConnector OBJECT-TYPE
+	SYNTAX INTEGER {
+		invalid(0),
+		dvi(1),
+		displayport(2),
+		hdmi(3),
+		sdi(4),
+		usb(5) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Connector Type"
+	::= { ledInputEntry 3 }
+
+ledInputSignal OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Input Signal Info"
+	::= { ledInputEntry 4 }
+
+ledInputFormat OBJECT-TYPE
+	SYNTAX INTEGER {
+		squareDivision(0),
+		vSplit(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Input Signal Info"
+	::= { ledInputEntry 5 }
+
+ledInputDpDualHighFrameRateMode OBJECT-TYPE
+	SYNTAX INTEGER {
+		off(0),
+		on(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"DP High Frate Mode"
+	::= { ledInputEntry 6 }
+
+ledInputPictureHPosition OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Picture H Position"
+	::= { ledInputEntry 7 }
+
+ledInputPictureVPosition OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Picture V Position"
+	::= { ledInputEntry 8 }
+
+ledInputStatusError OBJECT-TYPE
+	SYNTAX INTEGER {
+		invalid(-1),
+		noError(0),
+		outofRange(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Error Info"
+	::= { ledInputEntry 9 }
+
+ledInput3Dmode OBJECT-TYPE
+	SYNTAX INTEGER {
+		frameSeq(0),
+		dualInput(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"3D Mode"
+	::= { ledInputEntry 10 }
+
+ledInput3DStatus OBJECT-TYPE
+	SYNTAX INTEGER {
+		frameSeq(0),
+		dualInput(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"3D Status"
+	::= { ledInputEntry 11 }
+
+ledInput3DInputDelay OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"3D Input Delay"
+	::= { ledInputEntry 12 }
+
+ledInput3DPhaseInversion OBJECT-TYPE
+	SYNTAX INTEGER {
+		normal(0),
+		inversion(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"3D Phase Inversion"
+	::= { ledInputEntry 13 }
+
+ledInputSyncStatus OBJECT-TYPE
+	SYNTAX INTEGER {
+		invalid(-1),
+		sync(0),
+		noSync(1),
+		outofRange(2) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Sync Status"
+	::= { proV1ledInput 2 }
+
+ledInputDpDual3d4kMode OBJECT-TYPE
+	SYNTAX INTEGER {
+		off(0),
+		on(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"DP Dual 3D 2k/4k mode"
+	::= { proV1ledInput 3 }
+
+proV1ledFan OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"Fan Info"
+	::= { proV1ledDisplay 8 }
+
+ledFanControllerTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedFanControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Controller Fan Table"
+	::= { proV1ledFan 1 }
+
+ledFanControllerEntry OBJECT-TYPE
+	SYNTAX LedFanControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"top of entry"
+	INDEX {
+		ledFanControllerIdx }
+	::= { ledFanControllerTable 1 }
+
+LedFanControllerEntry ::= SEQUENCE {
+	ledFanControllerIdx Integer32,
+	ledFanControllerModule DisplayString,
+	ledFanControllerSpeed Integer32,
+	ledFanControllerDutyforTarget Integer32 }
+
+ledFanControllerIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller fan entry index"
+	::= { ledFanControllerEntry 1 }
+
+ledFanControllerModule OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Fan Module Name"
+	::= { ledFanControllerEntry 2 }
+
+ledFanControllerSpeed OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Fan Speed"
+	::= { ledFanControllerEntry 3 }
+
+ledFanControllerDutyforTarget OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Fan Duty"
+	::= { ledFanControllerEntry 4 }
+
+ledFanUnitTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedFanUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Unit Fan Table"
+	::= { proV1ledFan 2 }
+
+ledFanUnitEntry OBJECT-TYPE
+	SYNTAX LedFanUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"top of entry"
+	INDEX {
+		ledFanUnitIdx }
+	::= { ledFanUnitTable 1 }
+
+LedFanUnitEntry ::= SEQUENCE {
+	ledFanUnitIdx Integer32,
+	ledFanUnitPortId INTEGER,
+	ledFanUnitUnitId INTEGER,
+	ledFanUnitSpeedLeft Integer32,
+	ledFanUnitSpeedRight Integer32,
+	ledFanUnitDutyLeft Integer32,
+	ledFanUnitDutyRight Integer32 }
+
+ledFanUnitIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"unit fan entry index"
+	::= { ledFanUnitEntry 1 }
+
+ledFanUnitPortId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Port Number"
+	::= { ledFanUnitEntry 2 }
+
+ledFanUnitUnitId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Unit Number"
+	::= { ledFanUnitEntry 3 }
+
+ledFanUnitSpeedLeft OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Fan Speed Left"
+	::= { ledFanUnitEntry 5 }
+
+ledFanUnitSpeedRight OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Fan Speed Right"
+	::= { ledFanUnitEntry 6 }
+
+ledFanUnitDutyLeft OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Fan Duty Left"
+	::= { ledFanUnitEntry 7 }
+
+ledFanUnitDutyRight OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Fan Duty Right"
+	::= { ledFanUnitEntry 8 }
+
+proV1ledTemperature OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"Temperature Info"
+	::= { proV1ledDisplay 9 }
+
+ledTemperatureControllerTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedTemperatureControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Controller Temperature Table"
+	::= { proV1ledTemperature 1 }
+
+ledTemperatureControllerEntry OBJECT-TYPE
+	SYNTAX LedTemperatureControllerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledTemperatureControllerIdx }
+	::= { ledTemperatureControllerTable 1 }
+
+LedTemperatureControllerEntry ::= SEQUENCE {
+	ledTemperatureControllerIdx Integer32,
+	ledTemperatureControllerModule DisplayString,
+	ledTemperatureControllerCelsius DisplayString }
+
+ledTemperatureControllerIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"controller temperature entry index"
+	::= { ledTemperatureControllerEntry 1 }
+
+ledTemperatureControllerModule OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Temperature Module Name"
+	::= { ledTemperatureControllerEntry 2 }
+
+ledTemperatureControllerCelsius OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Celsius"
+	::= { ledTemperatureControllerEntry 3 }
+
+ledTemperatureUnitTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedTemperatureUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Unit Temperature Table"
+	::= { proV1ledTemperature 2 }
+
+ledTemperatureUnitEntry OBJECT-TYPE
+	SYNTAX LedTemperatureUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledTemperatureUnitIdx }
+	::= { ledTemperatureUnitTable 1 }
+
+LedTemperatureUnitEntry ::= SEQUENCE {
+	ledTemperatureUnitIdx Integer32,
+	ledTemperatureUnitPortId INTEGER,
+	ledTemperatureUnitUnitId INTEGER,
+	ledTemperatureUnitCelsiusAmbient DisplayString,
+	ledTemperatureUnitCelsiusUcBoard DisplayString }
+
+ledTemperatureUnitIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"unit temperature entry index"
+	::= { ledTemperatureUnitEntry 1 }
+
+ledTemperatureUnitPortId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Port Number"
+	::= { ledTemperatureUnitEntry 2 }
+
+ledTemperatureUnitUnitId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Unit Number"
+	::= { ledTemperatureUnitEntry 3 }
+
+ledTemperatureUnitCelsiusAmbient OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Celsius"
+	::= { ledTemperatureUnitEntry 5 }
+
+ledTemperatureUnitCelsiusUcBoard OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Celsius"
+	::= { ledTemperatureUnitEntry 6 }
+
+proV1ledPictureSetting OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"Picture Setting Info"
+	::= { proV1ledDisplay 10 }
+
+ledPictureSettingContrast OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Picure Setting Contrast"
+	::= { proV1ledPictureSetting 2 }
+
+ledPictureSettingBrightness OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Picture Setting Brightness"
+	::= { proV1ledPictureSetting 3 }
+
+ledPictureSettingColorTemperature OBJECT-TYPE
+	SYNTAX INTEGER {
+		d93(0),
+		d65(1),
+		d50(2),
+		custom1(3),
+		custom2(4),
+		custom3(5) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Picture Setting Color Temperature"
+	::= { proV1ledPictureSetting 7 }
+
+ledPictureSettingColorSpace OBJECT-TYPE
+	SYNTAX INTEGER {
+		sRGB(0),
+		native(1),
+		adobeRGB(2),
+		dci(3),
+		bt2020(4) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Picture Setting Color Space"
+	::= { proV1ledPictureSetting 8 }
+
+ledPictureSettingGammaMode OBJECT-TYPE
+	SYNTAX INTEGER {
+		g1-8(0),
+		g2-2(1),
+		g2-6(2),
+		dicom-sim(3) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Picture Setting Gamma Mode"
+	::= { proV1ledPictureSetting 9 }
+
+proV1ledInstallSetting OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"Install Setting Info"
+	::= { proV1ledDisplay 12 }
+
+ledInstallSettingControllerLightOutput OBJECT-TYPE
+	SYNTAX INTEGER {
+		p25(0),
+		p50(1),
+		p75(2),
+		p100(3) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Light Output"
+	::= { proV1ledInstallSetting 0 }
+
+ledInstallSettingControllerDirectArrayPowerOn OBJECT-TYPE
+	SYNTAX INTEGER {
+		off(0),
+		on(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Direct Power On"
+	::= { proV1ledInstallSetting 1 }
+
+ledInstallSettingControllerUnitPowerOnDelay OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Unit Power On Delay"
+	::= { proV1ledInstallSetting 2 }
+
+ledInstallSettingControllerSyncSetting OBJECT-TYPE
+	SYNTAX INTEGER {
+		slave(0),
+		master(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Sync Setting"
+	::= { proV1ledInstallSetting 3 }
+
+ledInstallSettingControllerControllerId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller ID"
+	::= { proV1ledInstallSetting 4 }
+
+ledInstallSettingControllerControllerTotal OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Total Number"
+	::= { proV1ledInstallSetting 5 }
+
+ledInstallSettingControllerInputSyncMode OBJECT-TYPE
+	SYNTAX INTEGER {
+		inputSync(0),
+		refSync(1),
+		linkSync(2) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Input Sync Mode"
+	::= { proV1ledInstallSetting 7 }
+
+ledInstallSettingControllerLightDelay OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Controller Unit Lighting Phase Adjust"
+	::= { proV1ledInstallSetting 8 }
+
+ledInstallSettingControllerRePhotoMode OBJECT-TYPE
+	SYNTAX INTEGER {
+		off(0),
+		on(1) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Re Photo Mode"
+	::= { proV1ledInstallSetting 9 }
+
+ledInstallSettingUnitTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedInstallSettingUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Unit Install Setting Table"
+	::= { proV1ledInstallSetting 6 }
+
+ledInstallSettingUnitEntry OBJECT-TYPE
+	SYNTAX LedInstallSettingUnitEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledInstallSettingUnitIdx }
+	::= { ledInstallSettingUnitTable 1 }
+
+LedInstallSettingUnitEntry ::= SEQUENCE {
+	ledInstallSettingUnitIdx Integer32,
+	ledInstallSettingUnitPortId INTEGER,
+	ledInstallSettingUnitUnitId INTEGER,
+	ledInstallSettingUnitAllocationAddressHorizontal INTEGER,
+	ledInstallSettingUnitAllocationAddressVertical INTEGER,
+	ledInstallSettingUnitPictureAllocationAddressHorizontal INTEGER,
+	ledInstallSettingUnitPictureAllocationAddressVertical INTEGER,
+	ledInstallSettingUnitFanMode INTEGER }
+
+ledInstallSettingUnitIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"install setting entry index"
+	::= { ledInstallSettingUnitEntry 1 }
+
+ledInstallSettingUnitPortId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Port Number"
+	::= { ledInstallSettingUnitEntry 2 }
+
+ledInstallSettingUnitUnitId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Unit Number"
+	::= { ledInstallSettingUnitEntry 3 }
+
+ledInstallSettingUnitAllocationAddressHorizontal OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Allocatin Horizontal"
+	::= { ledInstallSettingUnitEntry 4 }
+
+ledInstallSettingUnitAllocationAddressVertical OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Allocatin Vertical"
+	::= { ledInstallSettingUnitEntry 5 }
+
+ledInstallSettingUnitPictureAllocationAddressHorizontal OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Picture Allocation Horizontal"
+	::= { ledInstallSettingUnitEntry 6 }
+
+ledInstallSettingUnitPictureAllocationAddressVertical OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Picture Allocation Vertical"
+	::= { ledInstallSettingUnitEntry 7 }
+
+ledInstallSettingUnitFanMode OBJECT-TYPE
+	SYNTAX INTEGER {
+		normal(0),
+		silent(1),
+		off(2) }
+
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Fan Mode"
+	::= { ledInstallSettingUnitEntry 8 }
+
+proV1ledCellStatus OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION
+		"Cell Status Info"
+	::= { proV1ledDisplay 13 }
+
+ledCellStatusTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LedCellStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Cell Status Table"
+	::= { proV1ledCellStatus 1 }
+
+ledCellStatusEntry OBJECT-TYPE
+	SYNTAX LedCellStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Top of entry"
+	INDEX {
+		ledCellStatusIdx }
+	::= { ledCellStatusTable 1 }
+
+LedCellStatusEntry ::= SEQUENCE {
+	ledCellStatusIdx Integer32,
+	ledCellStatusPortId INTEGER,
+	ledCellStatusUnitId INTEGER,
+	ledCellStatusTemperatureCell1 DisplayString,
+	ledCellStatusTemperatureCell2 DisplayString,
+	ledCellStatusTemperatureCell3 DisplayString,
+	ledCellStatusTemperatureCell4 DisplayString,
+	ledCellStatusTemperatureCell5 DisplayString,
+	ledCellStatusTemperatureCell6 DisplayString,
+	ledCellStatusTemperatureCell7 DisplayString,
+	ledCellStatusTemperatureCell8 DisplayString,
+	ledCellStatusTemperatureCell9 DisplayString,
+	ledCellStatusTemperatureCell10 DisplayString,
+	ledCellStatusTemperatureCell11 DisplayString,
+	ledCellStatusTemperatureCell12 DisplayString }
+
+ledCellStatusIdx OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"cell status entry index"
+	::= { ledCellStatusEntry 1 }
+
+ledCellStatusPortId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Port Number"
+	::= { ledCellStatusEntry 2 }
+
+ledCellStatusUnitId OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Unit Unit Number"
+	::= { ledCellStatusEntry 3 }
+
+ledCellStatusTemperatureCell1 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell1 Temperature"
+	::= { ledCellStatusEntry 5 }
+
+ledCellStatusTemperatureCell2 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell2 Temperature"
+	::= { ledCellStatusEntry 6 }
+
+ledCellStatusTemperatureCell3 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell3 Temperature"
+	::= { ledCellStatusEntry 7 }
+
+ledCellStatusTemperatureCell4 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell4 Temperature"
+	::= { ledCellStatusEntry 8 }
+
+ledCellStatusTemperatureCell5 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell5 Temperature"
+	::= { ledCellStatusEntry 9 }
+
+ledCellStatusTemperatureCell6 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell6 Temperature"
+	::= { ledCellStatusEntry 10 }
+
+ledCellStatusTemperatureCell7 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell7 Temperature"
+	::= { ledCellStatusEntry 11 }
+
+ledCellStatusTemperatureCell8 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell8 Temperature"
+	::= { ledCellStatusEntry 12 }
+
+ledCellStatusTemperatureCell9 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell9 Temperature"
+	::= { ledCellStatusEntry 13 }
+
+ledCellStatusTemperatureCell10 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell10 Temperature"
+	::= { ledCellStatusEntry 14 }
+
+ledCellStatusTemperatureCell11 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell11 Temperature"
+	::= { ledCellStatusEntry 15 }
+
+ledCellStatusTemperatureCell12 OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Cell12 Temperature"
+	::= { ledCellStatusEntry 16 }
+
+END

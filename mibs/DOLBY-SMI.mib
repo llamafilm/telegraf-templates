@@ -1,0 +1,97 @@
+DOLBY-SMI
+
+
+DEFINITIONS ::= BEGIN
+
+
+IMPORTS 
+	MODULE-IDENTITY, OBJECT-IDENTITY, 
+	enterprises
+		FROM SNMPv2-SMI;
+
+
+dolbySMI	MODULE-IDENTITY
+
+	LAST-UPDATED
+			"200701292258Z"
+	ORGANIZATION
+			"Dolby Laboratories Inc"
+	CONTACT-INFO	
+			"Steve Oddo
+			 email: sjo@dolby.com"
+	DESCRIPTION
+			"The Structure of Management Information
+			 for Dolby Laboratories Inc
+			 Copyright 2007 Dolby Laboratories Inc"
+	REVISION
+			"200701292258Z"
+	DESCRIPTION
+			"SMIv2 version - preliminary"
+
+	::= { dolbyModules 1 }
+
+--
+-- root OID for all areas 
+--
+
+dolby		OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"Root OID for Dolby Laboratories Inc"
+	::={ enterprises 6729 }
+
+--
+-- Sub-tree areas under the 'dolby' enterprise number
+--
+
+dolbyReg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"Registrations area. Sub-tree for identity values"
+	::={ dolby 1 } 
+
+
+dolbyModules		OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"Module registrations. Identities of Dolby's 
+			 MIB modules"
+	::={ dolbyReg 1 }
+
+
+dolbyProducts		OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The root object identifier for product-specific
+			 object and event definitions."
+	::={ dolby 2 }
+
+dolbyGeneric		OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The root object identifier for generic (cross-product)
+			 object and event definitions."
+	::={ dolby 3 }
+
+
+dolbyCaps		OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"Sub-tree for network management agent capability statements."
+                        -- SNMP agents (servers).
+	::={ dolby 4 }
+
+
+dolbyReqs		OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"Sub-tree for requirements for network management applications"
+                         -- SNMP management stations (clients).
+	::={ dolby 5 }
+
+
+dolbyExperimental	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"Development area - subject to change."
+	::={ dolby 6 }
+
+
+--
+-- Macros, textual conventions ... 
+--
+
+
+END

@@ -1,0 +1,122 @@
+-- **************************************************************************************
+-- CDS-SMI  Christie Digital Systems Enterprise Structure of Management Information
+-- 
+-- August 2002, Doug J. Cabell January 2006 Ver. 2.0 DJC September 2009 Ver
+-- 3.0 DJC
+-- 
+-- Copyright (c) 2002-2009 by Christie Digital Systems, Inc. All rights
+-- reserved.
+-- 
+-- **************************************************************************************
+
+CDS-SMI DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, enterprises
+        FROM SNMPv2-SMI
+    ;
+
+-- John Beck:
+-- Branch into business units / product types / product_model example:
+-- .cdEs.cdEsProjector.cp2220
+-- Still maintained old cdProjectors Mib 25766.1.11
+
+christiedigital MODULE-IDENTITY
+    LAST-UPDATED  "200910261740Z" -- October 26, 2009
+    ORGANIZATION
+        "Christie Digital Systems, Inc."
+    CONTACT-INFO
+        "Christie Digital Systems
+         Customer Service
+
+         Postal: 10550 Camden Drive
+         Cypress, CA 90630
+         USA
+
+         Tel: +1 800 221-8025
+
+         E-mail: support@christiedigital.com"
+    DESCRIPTION
+        "The Structure of Management Information for the Christie
+         Digital Systems enterprise."
+    REVISION      "200910191337Z" -- October 19, 2009
+    DESCRIPTION
+        "Branch SMI into business units"
+    REVISION      "200909290000Z" -- September 29, 2009
+    DESCRIPTION
+        "Seperated to CDS-SMI."
+    REVISION      "200208300000Z" -- August 30, 2002
+    DESCRIPTION
+        "Initial christiedigital version."
+    ::= { enterprises 25766 }
+
+-- assigned by IANA
+
+christieDigitalProduct OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "christieDigitalProduct is the subtree root for products
+         developed by Christie Digital Systems. Permanently assigned
+         sysObjectIDs values are under this branch."
+    ::= { christiedigital 1 }
+
+cdProjectors OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "General Projectors pre 2010 manufacturing dates"
+    ::= { christieDigitalProduct 11 }
+
+cdEs OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "Entertainment Solutions Product Family"
+    ::= { christieDigitalProduct 12 }
+
+cdEsProjector OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "Entertainment Solutions Projectors"
+    ::= { cdEs 1 }
+
+cdEsScalers OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "Entertainment Solutions Scalers"
+    ::= { cdEs 2 }
+
+cdEsAutomation OBJECT IDENTIFIER ::= { cdEs 3 }
+
+cdBp OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "Business Products Family"
+    ::= { christieDigitalProduct 13 }
+
+cdVe OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "Visual Environments Product Family"
+    ::= { christieDigitalProduct 14 }
+
+christieDigitalCommonConformance OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "The conformance statements for SNMP entities which implement
+         Christie Digital Systems MIBs."
+    ::= { christiedigital 9 }
+
+christieDigitalCommonGroups OBJECT IDENTIFIER ::= { christieDigitalCommonConformance 1 }
+
+christieDigitalCommonCompliances OBJECT IDENTIFIER ::= { christieDigitalCommonConformance 2 }
+
+christieDigitalExperimentmental OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "christieDigitalExperimentmental is the root OBJECT IDENTIFIER
+         from which sysObjectID values are assigned for objects not yet
+         permanently assigned"
+    ::= { christiedigital 10 }
+
+END
+
+

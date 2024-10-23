@@ -1,0 +1,521 @@
+---
+---  Copyright(C) 2016 Adder Technology Limited
+---
+---  AdderLink Infinity Manager (AIM) Management Information Base (MIB)
+---
+
+ADDER-AIM-MIB DEFINITIONS ::= BEGIN
+
+    IMPORTS
+        MODULE-IDENTITY, OBJECT-IDENTITY, NOTIFICATION-TYPE,
+        OBJECT-TYPE, Unsigned32, enterprises FROM SNMPv2-SMI
+        NOTIFICATION-GROUP, OBJECT-GROUP FROM SNMPv2-CONF;
+
+    adderlinkInfinityManager MODULE-IDENTITY
+        LAST-UPDATED "201606271450Z"
+        ORGANIZATION "Adder Technology Limited"
+        CONTACT-INFO
+            "http://www.adder.com/contact-details"
+        DESCRIPTION
+            "Top level AdderLink Infinity Manager MIB tree"
+        REVISION    "201606271450Z"
+        DESCRIPTION
+            "In development"
+    ::= { enterprises 25119 1 }
+
+    adderTechnology OBJECT IDENTIFIER ::= { enterprises 25119 }
+
+    infinityTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF InfinityEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "Table of Infinities"
+        ::=  { adderlinkInfinityManager 1 }
+
+    infinity OBJECT-TYPE
+        SYNTAX InfinityEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "Row definition for Infinity table."
+        INDEX { deviceIndex }
+    ::= { infinityTable 1 }
+
+    InfinityEntry ::= SEQUENCE {
+        deviceIndex         Unsigned32,
+        deviceType          OCTET STRING,
+        deviceFirmware      OCTET STRING,
+        deviceName          OCTET STRING,
+        deviceIdentifier    OCTET STRING,
+        deviceIP1           OCTET STRING,
+        deviceMAC1          OCTET STRING,
+        deviceIP2           OCTET STRING,
+        deviceMAC2          OCTET STRING,
+        deviceSerialNum     OCTET STRING,
+        deviceStatus        INTEGER,
+        deviceLock          INTEGER,
+        deviceEth1Status    INTEGER,
+        deviceEth2Status    INTEGER
+    }
+
+    deviceIndex OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "d_id from the 'device' tuple"
+    ::= { infinity 1 }
+
+    deviceType OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(2..10))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Type of device"
+    ::= { infinity 2 }
+
+    deviceFirmware OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(1..30))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Firmware version of device"
+    ::= { infinity 3 }
+
+    deviceName OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(1..45))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "User-assigned name of device"
+    ::= { infinity 4 }
+
+    deviceIdentifier OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..16))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Unique Identifier of device"
+    ::= { infinity 5 }
+
+    deviceIP1 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..15))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "IP address of interface eth1"
+    ::= { infinity 6 }
+
+    deviceMAC1 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..17))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "MAC address of interface eth1"
+    ::= { infinity 7 }
+
+    deviceIP2 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..15))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "IP address of interface eth2"
+    ::= { infinity 8 }
+
+    deviceMAC2 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..17))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "MAC address of interface eth2"
+    ::= { infinity 9 }
+
+    deviceSerialNum OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..12))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Serial number of device"
+    ::= { infinity 10 }
+
+    deviceStatus OBJECT-TYPE
+        SYNTAX INTEGER {
+                        offline(1),
+                        online(2),
+                        rebooting(3),
+                        resetting(4),   -- executing a factory reset
+                        upgrading(5),   -- upgrading firmware
+                        unconfigured(6),-- unconfigured
+                        backup(7),      -- running backup firmware image
+                        unknown(8)      -- status unknown
+                 }
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "General status of device"
+    ::= { infinity 20 }
+
+    deviceLock OBJECT-TYPE
+        SYNTAX INTEGER {
+                        none(1),        -- Not connected
+                        videoOnly(2),
+                        shared(3),
+                        exclusive(4),
+                        private(5),
+                        unknown(6)      -- lockmode unknown
+                 }
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Lock mode of device"
+    ::= { infinity 21 }
+
+    deviceEth1Status OBJECT-TYPE
+        SYNTAX INTEGER {
+                        offline(1),        -- Not connected
+                        online(2),         -- Connected
+                        unconfigured(3),   -- Existing but no IP address
+                        absent(4),         -- Does not exist
+                        unknown(5)         -- Status unknown
+                 }
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Status of eth1 interface"
+    ::= { infinity 30 }
+
+    deviceEth2Status OBJECT-TYPE
+        SYNTAX INTEGER {
+                        offline(1),        -- Not connected
+                        online(2),         -- Connected
+                        unconfigured(3),   -- Existing but no IP address
+                        absent(4),         -- Does not exist
+                        unknown(5)         -- Status unknown
+                 }
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Status of eth2 interface"
+    ::= { infinity 40 }
+
+    deviceNetwork OBJECT-IDENTITY
+        STATUS current
+        DESCRIPTION
+            "Organisational node for data on the KVM network."
+        ::= { adderlinkInfinityManager 2 }
+        
+    numRx OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The number of Rx devices."
+        ::= { deviceNetwork 1 }
+        
+    numTx OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The number of Tx devices."
+        ::= { deviceNetwork 2 }
+        
+    numActiveConnexions OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The number of currently connected Rx devices."
+        ::= { deviceNetwork 3 }
+
+    serverState OBJECT-IDENTITY
+        STATUS current
+        DESCRIPTION
+            "Organisational node for data on the server's current state."
+        ::= { adderlinkInfinityManager 3 }
+        
+    serverCPULoad OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(4..6))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Load average over the last minute ('0.00' to '100.00', 
+            where '8.00' is fully loaded)."
+        ::= { serverState 1 }
+        
+    serverMemoryUsage OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(2..4))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Memory usage ('0%' to '100%')."
+        ::= { serverState 2 }
+        
+    serverSoftwareVersion OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(9..12))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "The software version (e.g. '4.3.12345')."
+        ::= { serverState 3 }
+        
+    serverDiskSpace OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(2..4))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Disk space in use ('0%' to '100%')."
+        ::= { serverState 4 }
+
+    events OBJECT-IDENTITY
+        STATUS current
+        DESCRIPTION
+            "System event data and trap definitions are organised under this 
+            node."
+        ::= { adderlinkInfinityManager 4 }
+
+    eventList OBJECT-IDENTITY
+        STATUS current
+        DESCRIPTION
+            "Notification objects are organised under this node."
+        ::= { events 0 }
+
+    deviceEthStatusChangedEv NOTIFICATION-TYPE
+        OBJECTS
+        {
+            deviceIndex,
+            deviceStatus,
+            deviceEth1Status,
+            deviceEth2Status
+        }
+        STATUS current
+        DESCRIPTION
+            "Sent when a device's eth1 or eth2 status changes."
+        ::= { eventList 1 }
+
+    packetLossData OBJECT-IDENTITY
+        STATUS current
+        DESCRIPTION
+            "Organisational node for data on a receiver head's packet loss."
+        ::= { adderlinkInfinityManager 5 }
+        
+    rxHead OBJECT-TYPE
+        SYNTAX BITS {
+                        head1(0), -- Video Head 1
+                        head2(1)  -- Video Head 2
+                 }
+        MAX-ACCESS accessible-for-notify
+        STATUS current
+        DESCRIPTION
+            "The video head to which the data apply."
+        ::= { packetLossData 1 }
+        
+    packetsSent OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS accessible-for-notify
+        STATUS current
+        DESCRIPTION
+            "The number of packets sent during the alert window."
+        ::= { packetLossData 2 }
+        
+    packetsDropped OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS accessible-for-notify
+        STATUS current
+        DESCRIPTION
+            "The number of packets dropped during the alert window."
+        ::= { packetLossData 3 }
+
+    packetLossEv NOTIFICATION-TYPE
+        OBJECTS
+        {
+            deviceIndex,
+            rxHead,
+            packetsSent,
+            packetsDropped
+        }
+        STATUS current
+        DESCRIPTION
+            "Sent when a receiver exceeds the packet-loss threshold within the 
+            alert window."
+        ::= { eventList 2 }
+
+    conformance OBJECT-IDENTITY
+        STATUS current
+        DESCRIPTION
+            "Organisational node for Conformance Objects."
+        ::= { adderlinkInfinityManager 6 }
+
+    conformanceGroups OBJECT-IDENTITY
+        STATUS current
+        DESCRIPTION
+            "Organisational node for Conformance Groups."
+        ::= { conformance 0 }
+
+    notificationsGroup NOTIFICATION-GROUP
+        NOTIFICATIONS
+        {
+            deviceEthStatusChangedEv,
+            packetLossEv
+        }
+        STATUS current
+        DESCRIPTION
+            "Group of all notification types."
+        ::= { conformanceGroups 1 }
+
+    objectsGroup OBJECT-GROUP
+        OBJECTS
+        {
+            deviceIndex,
+            deviceType,
+            deviceFirmware,
+            deviceName,
+            deviceIdentifier,
+            deviceIP1,
+            deviceMAC1,
+            deviceIP2,
+            deviceMAC2,
+            deviceSerialNum,
+            deviceStatus,
+            deviceLock,
+            deviceEth1Status,
+            deviceEth2Status,
+            numRx,
+            numTx,
+            numActiveConnexions,
+            serverCPULoad,
+            serverMemoryUsage,
+            serverSoftwareVersion,
+            serverDiskSpace,
+            rxHead,
+            packetsSent,
+            packetsDropped
+        }
+        STATUS current
+        DESCRIPTION
+            "Group of all object types."
+        ::= { conformanceGroups 2 }
+     
+    serverDetailsTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF ServerEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "Table of server details"
+        ::=  { adderlinkInfinityManager 7 }
+
+    serverDetails OBJECT-TYPE
+        SYNTAX ServerEntry
+        MAX-ACCESS not-accessible
+        STATUS current
+        DESCRIPTION
+            "Row definition for server details."
+        INDEX { serverId }
+    ::= { serverDetailsTable 1 }
+
+    ServerEntry ::= SEQUENCE {
+        serverId            Unsigned32,
+        serverName          OCTET STRING,
+        serverRole          OCTET STRING,
+        serverStatus        OCTET STRING,
+        serverIP1           OCTET STRING,
+        serverMAC1          OCTET STRING,
+        serverEth1Enabled   INTEGER,
+        serverIP2           OCTET STRING,
+        serverMAC2          OCTET STRING
+    }
+        
+    serverId OBJECT-TYPE
+        SYNTAX Unsigned32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "id of servers"
+        ::= { serverDetails 1 }
+
+    serverName OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(1..45))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "User-assigned name of server"
+        ::= { serverDetails 2 }
+
+    serverRole OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(1..20))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "current role of server"
+        ::= { serverDetails 3 }
+
+    serverStatus OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(1..20))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "current status of server"
+        ::= { serverDetails 4 }
+
+    serverIP1 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..15))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "IP address of interface eth1"
+        ::= { serverDetails 5 }
+
+    serverMAC1 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..17))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "MAC address of interface eth1"
+        ::= { serverDetails 6 }
+
+    serverEth1Enabled OBJECT-TYPE
+        SYNTAX INTEGER {
+                        no(0),
+                        dhcp(1),
+                        static(2),
+                        bonded(3),
+                        unknown(4)      -- serverEth1Enabled unknown
+                 }
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "status of interface eth1 enable"
+        ::= { serverDetails 7 }
+
+    serverIP2 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..15))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "IP address of interface eth2"
+        ::= { serverDetails 8 }
+
+    serverMAC2 OBJECT-TYPE
+        SYNTAX OCTET STRING(SIZE(0..17))
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "MAC address of interface eth2"
+        ::= { serverDetails 9 }
+
+ 
+    serverStatusChangedEv NOTIFICATION-TYPE
+        OBJECTS
+        {
+            serverId,
+            serverName,
+            serverRole,
+            serverStatus
+        }
+        STATUS current
+        DESCRIPTION
+            "Sent when server changes its status."
+        ::= { eventList 3 }
+   
+END

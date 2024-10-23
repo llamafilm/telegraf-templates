@@ -1,0 +1,242 @@
+DOLBY-GLOBAL-REG
+
+
+DEFINITIONS ::= BEGIN
+
+
+IMPORTS
+	MODULE-IDENTITY, OBJECT-IDENTITY,
+	enterprises
+		FROM SNMPv2-SMI
+
+	dolby, dolbyModules, dolbyReg
+		FROM DOLBY-SMI;
+
+
+dolbyGlobalReg		MODULE-IDENTITY
+
+	LAST-UPDATED	"201609060000Z"
+
+	ORGANIZATION	"Dolby Laboratories Inc."
+
+	CONTACT-INFO	"Steve Oddo
+			 email: sjo@dolby.com"
+
+	DESCRIPTION	"The Dolby Laboratories top-level registration module
+			 Copyright 2007 Dolby Laboratories Inc"
+
+	REVISION	"201609060000Z"
+	DESCRIPTION	"Added Dolby Multichannel Amplifier Products"
+
+	REVISION	"201605160000Z"
+	DESCRIPTION	"Added Broadcast Professional Products"
+
+	REVISION	"201512140000Z"
+	DESCRIPTION	"Added CP850 Dolby Atmos Cinema Processor"
+
+	REVISION 	"201308271834Z"
+	DESCRIPTION "Moved showPlayerReg to dolbyCinemaDecodersModule"
+
+	REVISION	"201304020000Z"
+	DESCRIPTION	"Added Dolby Voice Conferencing products"
+
+	REVISION	"201004200000Z"
+	DESCRIPTION	"Added generic Cinema Components - preliminary"
+
+	REVISION	"200810080046Z"
+	DESCRIPTION	"Added CP750 - preliminary"
+
+	REVISION	"200701292317Z"
+	DESCRIPTION	"SMIv2 version - preliminary"
+
+	 ::={ dolbyModules 2 }
+
+--
+-- registrations - top level product divisions
+--
+
+professionalProductsReg	OBJECT IDENTIFIER	::={ dolbyReg 2 }
+consumerProductsReg 	OBJECT IDENTIFIER	::={ dolbyReg 3 }
+voiceProductsReg	OBJECT IDENTIFIER	::={ dolbyReg 4 }
+
+-- Other  product divisions ...
+
+--
+-- Professional product families
+--
+
+
+-- Cinema products
+
+cinemaReg 		OBJECT IDENTIFIER	::={ professionalProductsReg 1 }
+
+
+-- cinema product lines
+
+cinemaProcessorReg	OBJECT IDENTIFIER	::={ cinemaReg 1 }
+cinemaAdapterReg	OBJECT IDENTIFIER	::={ cinemaReg 2 }
+cinemaServerReg		OBJECT IDENTIFIER	::={ cinemaReg 3 }
+cinemaDecoderReg	OBJECT IDENTIFIER	::={ cinemaReg 4 }
+cinemaAutomationReg	OBJECT IDENTIFIER	::={ cinemaReg 5 }
+cinemaComponentReg	OBJECT IDENTIFIER	::={ cinemaReg 6 }
+cinemaAmplifierReg	OBJECT IDENTIFIER	::={ cinemaReg 7 }
+
+
+-- Broadcast Professional Products
+
+broadcastReg OBJECT IDENTIFIER ::= { professionalProductsReg 2 }
+
+
+-- Broadcast Professional Products lines
+
+broadcastAudioDecoderReg    OBJECT IDENTIFIER ::= { broadcastReg 1 }
+broadcastObjectAuthoringReg OBJECT IDENTIFIER ::= { broadcastReg 2 }
+broadcastAudioEncoderReg    OBJECT IDENTIFIER ::= { broadcastReg 3 }
+
+
+--
+-- Other Professional product families ...
+--
+
+
+--
+-- Individual product registrations
+--
+
+
+--
+-- Cinema product identities
+--
+
+
+cp650Reg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The CP650 Cinema processor."
+	::={ cinemaProcessorReg 1 }
+
+
+cp750Reg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The CP750 Cinema processor."
+	::={ cinemaProcessorReg 2 }
+
+
+cp850Reg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The CP850 Cinema processor."
+	::={ cinemaProcessorReg 3 }
+
+
+cp950Reg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The CP950 Cinema processor."
+	::={ cinemaProcessorReg 4 }
+
+
+cpGenericReg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"A Cinema processor."
+	::={ cinemaProcessorReg 5 }
+     
+
+--
+-- Other cinema processors ...
+--
+
+
+dma8PlusReg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The DMA8+ Digital Media Adapter."
+	::={ cinemaAdapterReg 1 }
+
+--
+-- Other cinema audio adapters ...
+--
+
+
+showStoreReg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The D-Cinema Show Store."
+	::={ cinemaServerReg 1 }
+
+
+showLibraryReg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The D-Cinema Show Library."
+	::={ cinemaServerReg 2 }
+
+--
+-- Other cinema content servers ...
+--
+
+
+--
+-- Other cinema content decoders ...
+--
+
+
+networkAutomationInterfaceReg	OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The NA10 Network Automation Interface."
+	::={ cinemaAutomationReg 1 }
+
+
+--
+-- Other cinema automation gear ...
+--
+
+daaReg		OBJECT-IDENTITY
+	STATUS		current
+	DESCRIPTION	"The Dolby Multichannel Amplifier"
+	::={ cinemaAmplifierReg 1 }
+
+
+--
+-- Other cinema amplifiers ...
+--
+
+--
+-- Other Cinema products: Mastering, Camera, QA Software ...
+--
+
+
+--
+-- Broadcast Professional Products identities
+--
+
+dp580Reg OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION "The DP580 Audio Decoder"
+	::= { broadcastAudioDecoderReg 1 }
+
+dp590Reg OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION "The DP590 Object Authoring"
+	::= { broadcastObjectAuthoringReg 1 }
+
+dp591Reg OBJECT-IDENTITY
+	STATUS current
+	DESCRIPTION "The DP591 Audio Encoder"
+	::= { broadcastAudioEncoderReg 1 }
+
+--
+-- Other  products: Encoders, Limiters ...
+--
+
+--
+-- Voice product families
+--
+voiceServiceProviderReg	OBJECT IDENTIFIER	::={ voiceProductsReg 1 }
+voiceEnterpriseReg	OBJECT IDENTIFIER	::={ voiceProductsReg 2 }
+voiceConsumerReg	OBJECT IDENTIFIER	::={ voiceProductsReg 3 }
+voiceMobileReg		OBJECT IDENTIFIER	::={ voiceProductsReg 4 }
+
+-- Voice Service Provider product identities
+
+-- Voice Enterprise product identities
+
+-- Voice Consumer product identities
+
+-- Voice Mobile product identities
+
+END

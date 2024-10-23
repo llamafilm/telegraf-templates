@@ -1,0 +1,164 @@
+DOLBY-CP-GENERIC-MIB
+
+
+DEFINITIONS ::= BEGIN
+
+
+IMPORTS
+         MODULE-IDENTITY, OBJECT-TYPE, OBJECT-IDENTITY
+                FROM SNMPv2-SMI
+
+         MODULE-COMPLIANCE, OBJECT-GROUP
+                FROM SNMPv2-CONF
+
+         dolbyModules
+                FROM DOLBY-SMI
+
+         cpGenericReg
+                FROM DOLBY-GLOBAL-REG
+
+         cinemaProcessorsGeneric
+                FROM DOLBY-GENERIC-MIB;
+
+
+dolbyCPGenericMIBModule MODULE-IDENTITY
+
+                LAST-UPDATED
+                                "202001160000Z"
+
+                ORGANIZATION
+                                "Dolby Laboratories Inc."
+
+                CONTACT-INFO
+                                "Ethan Grossman
+                                 email: eagros@dolby.com"
+
+                DESCRIPTION
+                                "This MIB defines Nodes and Data Objects that are common to all Dolby Cinema Processors"
+
+                REVISION
+                                "202001160000Z"
+
+                DESCRIPTION     "First version contains basic identity information"
+
+		::= {dolbyModules 15}
+
+--
+-- Local object definitions
+--
+
+cpIdentity OBJECT-IDENTITY
+	STATUS     current
+	DESCRIPTION
+            "All properties related to the unit's identity and quick identification
+            properties are organized under this node."
+        ::= { cinemaProcessorsGeneric 2 }
+                        
+--
+-- Identity
+--
+
+cpIDProductName OBJECT-TYPE
+        SYNTAX     OCTET STRING (SIZE (0..64))
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+            "The product name"
+        ::= { cpIdentity 1 }
+
+cpIDSerialNumber OBJECT-TYPE
+    SYNTAX      OCTET STRING (SIZE (0..64))
+    MAX-ACCESS	read-only
+    STATUS      current
+    DESCRIPTION
+        "The serial number of the Cinema Processor"
+    ::=	{ cpIdentity 2 }
+
+cpIDChassisSerialNumber   OBJECT-TYPE
+    SYNTAX     OCTET STRING (SIZE (0..64))
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The serial number of the Chassis if applicable.
+        If not applicable an empty string is returned."
+    ::=	{ cpIdentity 3 }
+
+cpIDSoftwareVersion  OBJECT-TYPE
+    SYNTAX     OCTET STRING (SIZE (0..64))
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The version of software running on the unit."
+    ::= { cpIdentity 4 }
+
+cpIDFirmwareVersion  OBJECT-TYPE
+    SYNTAX     OCTET STRING (SIZE (0..64))
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "This contains firmware version if applicable
+        If not applicable an empty string is returned."
+    ::= { cpIdentity 5 }
+
+cpIDHardwareVersion   OBJECT-TYPE
+    SYNTAX     OCTET STRING (SIZE (0..64))
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The hardware version of the cinema processor if applicable.
+        If not applicable an empty string is returned."
+    ::=	{ cpIdentity 6 }
+
+cpIDSMSoftwareVersion  OBJECT-TYPE
+    SYNTAX     OCTET STRING (SIZE (0..64))
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "This contains the SM Software version if applicable
+        If not applicable an empty string is returned."
+    ::= { cpIdentity 7 }
+
+
+--
+-- Notifications (none)
+--
+
+
+---
+--- Conformance statements
+---
+
+cpGenericConformances	OBJECT IDENTIFIER     ::= { cpGenericReg 1 }
+
+cpGenericGroups		OBJECT IDENTIFIER     ::= { cpGenericConformances 1 }
+
+cpGenericGroup  OBJECT-GROUP
+    OBJECTS { cpIDProductName,
+        cpIDSerialNumber,
+        cpIDSoftwareVersion,
+        cpIDFirmwareVersion,
+        cpIDSMSoftwareVersion,
+        cpIDChassisSerialNumber,
+        cpIDHardwareVersion
+        }
+    STATUS	current
+    DESCRIPTION
+        "Status objects required for the basic
+        implementation of the generic CP MIB."
+    ::= { cpGenericGroups 2 }
+
+
+cpGenericCompliances	OBJECT IDENTIFIER     ::= { cpGenericConformances 2 }
+
+cpGenericBasicCompl	MODULE-COMPLIANCE
+        STATUS	current
+        DESCRIPTION
+            "The basic implementation requirements 
+            for the generic CP MIB."
+        MODULE
+        MANDATORY-GROUPS { cpGenericGroup
+        }
+
+        ::= { cpGenericCompliances 1 }
+
+END

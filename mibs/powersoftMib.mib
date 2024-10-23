@@ -1,0 +1,145 @@
+NET-SNMP-POWERSOFT-MIB DEFINITIONS ::= BEGIN 
+
+  
+
+  
+
+IMPORTS 
+
+    MODULE-IDENTITY, OBJECT-TYPE, Integer32, Counter32, TimeTicks, 
+
+    enterprises FROM SNMPv2-SMI 
+
+; 
+
+  
+
+powersoft MODULE-IDENTITY 
+
+    LAST-UPDATED "202006180000Z" 
+
+    ORGANIZATION "www.powersoft.com" 
+
+    CONTACT-INFO  
+
+    "postal:   Via Enrico Conti, 5 
+
+                50018 Scandicci (FI) 
+
+                Italia 
+
+  
+
+          email:    filippo.digiugno@powersoft.com" 
+
+    DESCRIPTION 
+
+    "Amply Powersoft MIB objects" 
+
+    REVISION     "202006180000Z" 
+
+    DESCRIPTION 
+
+    "First draft" 
+
+    ::= { enterprises 55933 } 
+
+  
+
+powersoftAmpli             OBJECT IDENTIFIER ::= { powersoft 1 } 
+
+powersoftAmpliStatus           OBJECT IDENTIFIER ::= { powersoftAmpli 1 } 
+
+  
+
+standby OBJECT-TYPE 
+
+    SYNTAX      Counter32 
+
+    MAX-ACCESS  read-only 
+
+    STATUS      current 
+
+    DESCRIPTION 
+
+    "Value is 1 if amplifier is in standby, else 0." 
+
+    DEFVAL { 0 } 
+
+    ::= { powersoftAmpliStatus 1 } 
+
+  
+
+overTemperature OBJECT-TYPE 
+
+    SYNTAX      Counter32 
+
+    MAX-ACCESS  read-only 
+
+    STATUS      current 
+
+    DESCRIPTION 
+
+    "Value is 1 if the temperature of the amplifier overcomes the safe operating threshold, else 0." 
+
+    DEFVAL { 0 } 
+
+    ::= { powersoftAmpliStatus 2 } 
+
+  
+
+mainsAlarm OBJECT-TYPE 
+
+    SYNTAX      Counter32 
+
+    MAX-ACCESS  read-only 
+
+    STATUS      current 
+
+    DESCRIPTION 
+
+    "Value is 1 if mains are out of the accepted range, else 0. " 
+
+    DEFVAL { 0 } 
+
+    ::= { powersoftAmpliStatus 3 } 
+
+  
+
+hwProtection OBJECT-TYPE 
+
+    SYNTAX      Counter32 
+
+    MAX-ACCESS  read-only 
+
+    STATUS      current 
+
+    DESCRIPTION 
+
+    "Value is 1 if amplifier protected one or more channels due to unsafe operating conditions, else 0." 
+
+    DEFVAL { 0 } 
+
+    ::= { powersoftAmpliStatus 4 } 
+
+  
+
+hwFault OBJECT-TYPE 
+
+    SYNTAX      Counter32 
+
+    MAX-ACCESS  read-only 
+
+    STATUS      current 
+
+    DESCRIPTION 
+
+    "Value is 1 if amplifier detected a fault condition in its status, else 0." 
+
+    DEFVAL { 0 } 
+
+    ::= { powersoftAmpliStatus 5 } 
+
+  
+
+END 

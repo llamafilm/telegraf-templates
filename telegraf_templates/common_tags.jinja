@@ -1,0 +1,6 @@
+    site = "{{device.site.name | replace('\\', '\\\\') | replace('\"', '\\\"')}}"
+    room = "{{device.location.name | replace('\\', '\\\\') | replace('\"', '\\\"')}}"
+    description = "{{device.description | replace('\\', '\\\\') | replace('\"', '\\\"')}}"
+    netbox_id = "{{device.id}}"
+    device_type = "{{device.device_type.manufacturer.name | replace('\\', '\\\\') | replace('\"', '\\\"')}} {{device.device_type.model | replace('\\', '\\\\') | replace('\"', '\\\"')}}"
+    allow_alerts = "{{device.custom_field_data.get('allow_alerts')}}"
